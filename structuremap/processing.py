@@ -929,6 +929,7 @@ def perform_enrichment_analysis(df: pd.DataFrame,
                                 ptm_types: list,
                                 rois: list,
                                 quality_cutoffs: list,
+                                ptm_site_dict: dict,
                                 multiple_testing: bool = True) -> pd.DataFrame:
     """
     Get enrichment p-values for selected PTMs acros regions of interest (ROIs).
@@ -944,6 +945,8 @@ def perform_enrichment_analysis(df: pd.DataFrame,
         to perform the enrichment analysis.
     quality_cutoffs : list
         List of quality cutoffs (AlphaFold pLDDDT values) to filter for.
+    ptm_site_dict : dict
+        Dictionary containing the possible amino acid sites for each PTM.
     multiple_testing : bool
         Bool if multiple hypothesis testing correction should be performed.
         Default is 'True'.
@@ -991,7 +994,8 @@ def perform_enrichment_analysis(df: pd.DataFrame,
 def perform_enrichment_analysis_per_protein(df: pd.DataFrame,
                                             ptm_types: list,
                                             rois: list,
-                                            quality_cutoffs: list) -> pd.DataFrame:
+                                            quality_cutoffs: list,
+                                            ptm_site_dict: dict) -> pd.DataFrame:
 
     """
     Get per protein enrichment p-values for selected PTMs acros regions of
@@ -1008,6 +1012,8 @@ def perform_enrichment_analysis_per_protein(df: pd.DataFrame,
         to perform the enrichment analysis.
     quality_cutoffs : list
         List of quality cutoffs (AlphaFold pLDDDT values) to filter for.
+    ptm_site_dict : dict
+        Dictionary containing the possible amino acid sites for each PTM.
 
     Returns
     -------
@@ -1035,6 +1041,7 @@ def perform_enrichment_analysis_per_protein(df: pd.DataFrame,
                                           ptm_types = ptm_types,
                                           rois = rois,
                                           quality_cutoffs = quality_cutoffs,
+                                          ptm_site_dict = ptm_site_dict,
                                           multiple_testing = False)
         res.insert(loc=0, column='protein_id', value=np.repeat(protein_accession, res.shape[0]))
 
