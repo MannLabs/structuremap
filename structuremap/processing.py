@@ -11,6 +11,7 @@ import os
 import socket
 import re
 import Bio.PDB.MMCIF2Dict
+import scipy.stats
 
 def download_alphafold_cif(
     proteins: list,
@@ -922,3 +923,128 @@ def get_proximity_pvals(df: pd.DataFrame,
     #res_df_noNan['pvalue_3d_adj_bf'] = statsmodels.stats.multitest.multipletests(pvals=res_df_noNan.pvalue_3d, alpha=0.1, method='bonferroni')[1]
 
     return(res_df_noNan)
+
+
+def perform_enrichment_analysis(df: pd.DataFrame,
+                                ptm_types: list,
+                                rois: list,
+                                quality_cutoffs: list,
+                                multiple_testing: bool = True) -> pd.DataFrame:
+    """
+    Get enrichment p-values for selected PTMs acros regions of interest (ROIs).
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        pd.DataFrame of formatted AlphaFold data across various proteins.
+    ptm_types: list
+        List of PTM modifications for which to perform the enrichment analysis.
+    rois : list
+        List of regions of interest (one hot encoded columns in df) for which
+        to perform the enrichment analysis.
+    quality_cutoffs : list
+        List of quality cutoffs (AlphaFold pLDDDT values) to filter for.
+    multiple_testing : bool
+        Bool if multiple hypothesis testing correction should be performed.
+        Default is 'True'.
+
+    Returns
+    -------
+    : pd.DataFrame
+        Dataframe reporting p-values for the enrichment of all selected ptm_types
+        across selected rois.
+    """
+
+    enrichment = []
+
+    for q_cut in quality_cutoffs:
+        seq_ann_qcut = df[df.quality >= q_cut]
+        for ptm in ptm_types:
+            seq_ann_qcut_aa = seq_ann_qcut[seq_ann_qcut.AA.isin(ptm_site_dict[ptm])]
+            for roi in rois:
+                n_ptm_in_roi = seq_ann_qcut_aa[(seq_ann_qcut_aa[roi] == 1) & (seq_ann_qcut_aa[ptm] == 1)].shape[0]
+                n_ptm_not_in_roi = seq_ann_qcut_aa[(seq_ann_qcut_aa[roi] == 0) & (seq_ann_qcut_aa[ptm] == 1)].shape[0]
+                n_naked_in_roi = seq_ann_qcut_aa[(seq_ann_qcut_aa[roi] == 1) & (seq_ann_qcut_aa[ptm] == 0)].shape[0]
+                n_naked_not_in_roi = seq_ann_qcut_aa[(seq_ann_qcut_aa[roi] == 0) & (seq_ann_qcut_aa[ptm] == 0)].shape[0]
+
+                fisher_table = np.array([[n_ptm_in_roi, n_naked_in_roi], [n_ptm_not_in_roi, n_naked_not_in_roi]])
+                oddsr, p = scipy.stats.fisher_exact(fisher_table, alternative='two-sided')
+
+                res = pd.DataFrame({'quality_cutoff':[q_cut],
+                                   'ptm':[ptm],
+                                   'roi':[roi],
+                                   'n_aa_ptm': seq_ann_qcut_aa[seq_ann_qcut_aa[ptm] == 1].shape[0],
+                                   'n_aa_roi': seq_ann_qcut_aa[seq_ann_qcut_aa[roi] == 1].shape[0],
+                                   'oddsr':[oddsr],
+                                   'p':[p]})
+
+                enrichment.append(res)
+
+    enrichment_df = pd.concat(enrichment)
+
+    if multiple_testing:
+        enrichment_df['p_adj_bf'] = statsmodels.stats.multitest.multipletests(pvals=enrichment_df.p, alpha=0.01, method='bonferroni')[1]
+        enrichment_df['p_adj_bh'] = statsmodels.stats.multitest.multipletests(pvals=enrichment_df.p, alpha=0.01, method='fdr_bh')[1]
+
+    return(enrichment_df)
+
+def perform_enrichment_analysis_per_protein(df: pd.DataFrame,
+                                            ptm_types: list,
+                                            rois: list,
+                                            quality_cutoffs: list) -> pd.DataFrame:
+
+    """
+    Get per protein enrichment p-values for selected PTMs acros regions of
+    interest (ROIs).
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        pd.DataFrame of formatted AlphaFold data across various proteins.
+    ptm_types: list
+        List of PTM modifications for which to perform the enrichment analysis.
+    rois : list
+        List of regions of interest (one hot encoded columns in df) for which
+        to perform the enrichment analysis.
+    quality_cutoffs : list
+        List of quality cutoffs (AlphaFold pLDDDT values) to filter for.
+
+    Returns
+    -------
+    : pd.DataFrame
+        Dataframe reporting p-values for the enrichment of all selected ptm_types
+        across selected rois on a per protein basis.
+    """
+
+    df_sorted = df.sort_values(by=['protein_number', 'position']).reset_index(drop=True)
+
+    unique_proteins = df_sorted.protein_number.unique()
+
+    end = 0
+
+    enrichment_list = list()
+
+    for protein_i in tqdm.tqdm(unique_proteins):
+
+        start = end
+        end = find_end(protein_i, end, df_sorted.protein_number.values)
+        df_prot = df_sorted[start:end].reset_index(drop=True)
+        protein_accession = df_prot.protein_id.values[0]
+
+        res = perform_enrichment_analysis(df = df_prot,
+                                          ptm_types = ptm_types,
+                                          rois = rois,
+                                          quality_cutoffs = quality_cutoffs,
+                                          multiple_testing = False)
+        res.insert(loc=0, column='protein_id', value=np.repeat(protein_accession, res.shape[0]))
+
+        enrichment_list.append(res)
+
+    enrichment_per_protein = pd.concat(enrichment_list)
+    enrichment_per_protein = enrichment_per_protein[(enrichment_per_protein.n_aa_ptm >= 2) & (enrichment_per_protein.n_aa_roi >= enrichment_per_protein.n_aa_ptm)]
+    enrichment_per_protein = enrichment_per_protein.reset_index(drop=True)
+
+    enrichment_per_protein['p_adj_bf'] = statsmodels.stats.multitest.multipletests(pvals=enrichment_per_protein.p, alpha=0.01, method='bonferroni')[1]
+    enrichment_per_protein['p_adj_bh'] = statsmodels.stats.multitest.multipletests(pvals=enrichment_per_protein.p, alpha=0.01, method='fdr_bh')[1]
+
+    return enrichment_per_protein
