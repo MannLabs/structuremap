@@ -578,6 +578,12 @@ def annotate_accessibility(df: pd.DataFrame,
     accessibility_df = pd.DataFrame({'protein_id':proteins,'AA':AA,'position':AA_p})
     accessibility_df['nAA_'+str(max_dist)+'_'+str(max_angle)+'_'+use_pae] = a_AA
 
+    # glycine_vol = 60.1
+    # spherical_sector_volume = ((2*(np.pi)*(max_dist**3))/3)*(1-np.cos(np.deg2rad(max_angle)))
+    # n_max_AA = spherical_sector_volume/glycine_vol
+
+    # accessibility_df['nAA_'+str(max_dist)+'_'+str(max_angle)+'_'+use_pae+'_rel'] = a_AA/n_max_AA
+
     return(accessibility_df)
 
 @numba.njit()
@@ -617,7 +623,7 @@ def smooth_score(score: np.ndarray,
 
 def get_smooth_score(df: pd.DataFrame,
                      scores: np.ndarray,
-                     half_window: int
+                     half_windows: list,
                     ) -> pd.DataFrame:
     """
     Select columns in a dataframe and smooth the values per protein based on a provided window.
@@ -628,9 +634,9 @@ def get_smooth_score(df: pd.DataFrame,
         Dataframe with AlphaFold annotations.
     scores : np.ndarray
         Array of column names in the dataframe that should be smoothed.
-    half_window : int
-        Integer specifying the number of positions to consider both  before and after
-        a given target position.
+    half_windows : list
+        List of one or more integers specifying the number of positions
+        to consider both before and after a given target position.
 
     Returns
     -------
@@ -651,7 +657,10 @@ def get_smooth_score(df: pd.DataFrame,
         df_prot = df_sorted[start:end].reset_index(drop=True)
 
         for score in scores:
-            df_prot[score+'_smooth'] = smooth_score(score = df_prot[score].values, half_window = half_window)
+            for w in half_windows:
+                df_prot[score+'_smooth'+str(w)] = smooth_score(
+                    score = df_prot[score].values,
+                    half_window = w)
 
         df_out.append(df_prot)
     df_out = pd.concat(df_out)

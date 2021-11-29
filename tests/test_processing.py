@@ -206,9 +206,9 @@ def test_get_smooth_score():
                              'position':[1,2,3,4,5,6,1,2,3,4,5,6],
                              'score':[1,2,3,4,5,6,7,8,9,10,11,12],
                              'score_2':[10,20,30,40,50,60,70,80,90,100,110,120]})
-    test_res = get_smooth_score(testdata, np.array(['score','score_2']), 1)
-    np.testing.assert_equal([1.5,2,3,4,5,5.5,7.5,8,9,10,11,11.5], test_res.score_smooth.values)
-    np.testing.assert_equal([15,20,30,40,50,55,75,80,90,100,110,115], test_res.score_2_smooth.values)
+    test_res = get_smooth_score(testdata, np.array(['score','score_2']), [1])
+    np.testing.assert_equal([1.5,2,3,4,5,5.5,7.5,8,9,10,11,11.5], test_res.score_smooth1.values)
+    np.testing.assert_equal([15,20,30,40,50,55,75,80,90,100,110,115], test_res.score_2_smooth1.values)
 
 def test_get_avg_3d_dist():
     x = np.array([1.1,1.1,1.1,1.1,1.1,1.1])
