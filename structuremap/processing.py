@@ -12,6 +12,7 @@ import socket
 import re
 import Bio.PDB.MMCIF2Dict
 import scipy.stats
+from itertools import groupby
 
 def download_alphafold_cif(
     proteins: list,
@@ -1064,3 +1065,189 @@ def perform_enrichment_analysis_per_protein(df: pd.DataFrame,
     enrichment_per_protein['p_adj_bh'] = statsmodels.stats.multitest.multipletests(pvals=enrichment_per_protein.p, alpha=0.01, method='fdr_bh')[1]
 
     return enrichment_per_protein
+
+def find_idr_pattern(
+    idr_list : list,
+    min_structured_length : int = 100,
+    max_unstructured_length : int = 30
+) -> bool:
+    """
+    Find short intrinsically disordered regions.
+
+    Parameters
+    ----------
+    idr_list : list
+        Nested list specifying the binary IDR condition and its length. For example: [1,10],[0,30],[1,5]].
+    min_structured_length : int
+        Integer specifying the minimum number of amino acids in flanking structured regions.
+    max_unstructured_length : int
+        Integer specifying the maximum number of amino acids in the short intrinsically unstructured regions.
+
+    Returns
+    -------
+    : bool
+        If a pattern was found.
+    : list
+        List of start end end positions of short IDRs.
+    """
+    window = np.array([0,1,2])
+    i = 0
+    pattern = False
+    pos_list = list()
+
+    while (i < len(idr_list)-2):
+        window_i = window + i
+
+        if idr_list[window_i[0]][0] == 0:
+            if idr_list[window_i[0]][1] >= min_structured_length:
+                if idr_list[window_i[1]][1] <= max_unstructured_length:
+                    if idr_list[window_i[2]][1] >= min_structured_length:
+                        pattern = True
+                        idr_start = np.sum([x[1] for x in idr_list[0:i+1]])+1
+                        idr_end = idr_start + idr_list[i+1][1] - 1
+                        pos_list.append([idr_start, idr_end])
+        i += 1
+
+    return pattern, pos_list
+
+def annotate_proteins_with_idr_pattern(
+    df : pd.DataFrame,
+    min_structured_length : int = 100,
+    max_unstructured_length : int = 30
+) -> pd.DataFrame:
+    """
+    Find short intrinsically disordered regions.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Dataframe with AlphaFold annotations.
+    min_structured_length : int
+        Integer specifying the minimum number of amino acids in flanking structured regions.
+    max_unstructured_length : int
+        Integer specifying the maximum number of amino acids in the short intrinsically unstructured regions.
+
+    Returns
+    -------
+    : pd.DataFrame
+        Input dataframe with an additional column 'flexible_pattern'.
+    """
+
+    df_sorted = df.sort_values(by=['protein_number', 'position']).reset_index(drop=True)
+    df_sorted['flexible_pattern'] = 0
+
+    unique_proteins = df_sorted.protein_number.unique()
+
+    end = 0
+
+    proteins = list()
+    loop_pattern = list()
+    pattern_position = list()
+
+    for protein_i in tqdm.tqdm(unique_proteins):
+
+        start = end
+        end = find_end(protein_i, end, df_sorted.protein_number.values)
+
+        df_prot = df_sorted[start:end].reset_index(drop=True)
+
+        protein_accession = df_prot.protein_id.values[0]
+
+        idr_list = [[k, len(list(g))] for k, g in groupby(df_prot.IDR.values)]
+        pattern = find_idr_pattern(idr_list,
+                                   min_structured_length = min_structured_length,
+                                   max_unstructured_length = max_unstructured_length)
+
+        pattern_position_list = list()
+        if pattern[0]:
+            proteins.append(protein_accession)
+            loop_pattern.append(pattern[0])
+            pattern_position.append(pattern[1])
+
+            pattern_position_list = pattern_position_list + [list(np.arange(p[0],p[1]+1)) for p in pattern[1]]
+            pattern_position_list = [item for sublist in pattern_position_list for item in sublist]
+
+            df_sorted.loc[(df_sorted.protein_number==protein_i) &
+                      (df_sorted.position.isin(pattern_position_list)),'flexible_pattern'] = 1
+
+    return df_sorted
+
+@numba.njit()
+def extend_flexible_pattern(
+    pattern: np.ndarray,
+    window: int
+) -> np.ndarray:
+    """
+    Extend a pattern by the specified amino acid window
+
+    Parameters
+    ----------
+    pattern : np.ndarray
+        Array of binary pattern values.
+    window : int
+        Integer specifying the number of positions to consider both before and after
+        the provided pattern.
+
+    Returns
+    -------
+    : np.ndarray
+        Array with the extended pattern.
+    """
+    extended_pattern = []
+    for i in range(len(pattern)):
+        low_window_bound = i - window
+        if low_window_bound < 0:
+            low_window_bound = 0
+        high_window_bound = i + window
+        if high_window_bound > len(pattern):
+            high_window_bound = len(pattern)
+        window_patterns = pattern[low_window_bound: high_window_bound + 1]
+        window_max = np.max(window_patterns)
+        extended_pattern.append(window_max)
+    return np.array(extended_pattern)
+
+def get_extended_flexible_pattern(
+    df: pd.DataFrame,
+    patterns: np.ndarray,
+    windows: list,
+) -> pd.DataFrame:
+    """
+    Select columns in a dataframe for which to extend the pattern by the provided window.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Dataframe with AlphaFold annotations.
+    patterns : np.ndarray
+        Array of column names in the dataframe with binary values that should be extended.
+    windows : list
+        List of one or more integers specifying the number of positions
+        to consider both before and after a pattern.
+
+    Returns
+    -------
+    : pd.DataFrame
+        Input dataframe with additional columns containing the extended patterns.
+    """
+    df_sorted = df.sort_values(by=['protein_number', 'position']).reset_index(drop=True)
+    unique_proteins = df_sorted.protein_number.unique()
+    end = 0
+
+    df_out = []
+
+    for protein_i in tqdm.tqdm(unique_proteins):
+
+        start = end
+        end = find_end(protein_i, end, df_sorted.protein_number.values)
+
+        df_prot = df_sorted[start:end].reset_index(drop=True)
+
+        for pattern in patterns:
+            for w in windows:
+                df_prot[pattern+'_extended_'+str(w)] = extend_flexible_pattern(
+                    pattern = df_prot[pattern].values,
+                    window = w)
+
+        df_out.append(df_prot)
+    df_out = pd.concat(df_out)
+    return df_out

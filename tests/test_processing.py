@@ -11,6 +11,7 @@ import os
 import socket
 import re
 import Bio.PDB.MMCIF2Dict
+from itertools import groupby
 
 from structuremap.processing import download_alphafold_cif, \
     download_alphafold_pae, \
@@ -24,7 +25,11 @@ from structuremap.processing import download_alphafold_cif, \
     smooth_score, \
     get_smooth_score, \
     get_avg_3d_dist, \
-    get_avg_1d_dist
+    get_avg_1d_dist, \
+    find_idr_pattern, \
+    annotate_proteins_with_idr_pattern, \
+    extend_flexible_pattern, \
+    get_extended_flexible_pattern
 
 def test_download_alphafold_cif():
     test_folder = "data/test_files/"
@@ -248,3 +253,40 @@ def test_get_avg_1d_dist():
     pos = np.array([1,4,5,6])
     np.testing.assert_equal(4, np.round(get_avg_1d_dist(np.array([0,2]), pos), decimals=6))
     np.testing.assert_equal(2.666667, np.round(get_avg_1d_dist(np.array([0,1,2]), pos), decimals=6))
+
+def test_find_idr_pattern():
+    assert find_idr_pattern(idr_list = [[0,300],[1,10],[0,500],[1,500]])[0] == True
+    assert find_idr_pattern(idr_list = [[0,300],[1,50],[0,500]])[0] == False
+    assert find_idr_pattern(idr_list = [[0,50],[0,50],[1,50],[0,500]])[0] == False
+    assert find_idr_pattern(idr_list = [[0,30],[0,300],[1,50],[0,50]])[0] == False
+    assert find_idr_pattern(idr_list = [[0,30]])[0] == False
+
+    assert find_idr_pattern(idr_list = [[0,300],[1,10],[0,500],[1,500]])[1][0][0] == [301]
+    assert find_idr_pattern(idr_list = [[0,300],[1,10],[0,500],[1,500]])[1][0][1] == [310]
+    assert find_idr_pattern(idr_list = [[1,10],[0,300],[1,10],[0,500],[1,500]])[1][0][0] == [311]
+    assert find_idr_pattern(idr_list = [[1,10],[0,300],[1,10],[0,500],[1,500]])[1][0][1] == [320]
+
+def test_annotate_proteins_with_idr_pattern():
+    testdata = pd.DataFrame({'protein_id':[1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2],
+                             'protein_number':[1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2],
+                             'position':[1,2,3,4,5,6,7,8,9,10,11,12,1,2,3,4,5,6],
+                             'IDR':[0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,1,0,0]})
+    test_res = annotate_proteins_with_idr_pattern(testdata, 3, 3)
+    np.testing.assert_equal([0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            list(test_res.flexible_pattern.values))
+
+def test_extend_flexible_pattern():
+    np.testing.assert_equal(np.array([1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0]),
+                            extend_flexible_pattern(np.array([1,1,1,0,0,0,0,1,1,0,0,0,0]),1))
+
+def test_get_extended_flexible_pattern():
+    testdata = pd.DataFrame({'protein_id':[1,1,1,1,1,1,2,2,2,2,2,2],
+                             'protein_number':[1,1,1,1,1,1,2,2,2,2,2,2],
+                             'position':[1,2,3,4,5,6,1,2,3,4,5,6],
+                             'score':[1,1,0,0,0,1,1,1,0,0,0,0],
+                             'score_2':[0,0,0,0,0,0,0,0,0,0,0,1]})
+    test_res = get_extended_flexible_pattern(testdata, np.array(['score','score_2']), [1])
+    np.testing.assert_equal([1,1,1,0,1,1,1,1,1,0,0,0], test_res.score_extended_1.values)
+    test_res = get_extended_flexible_pattern(testdata, np.array(['score','score_2']), [2])
+    np.testing.assert_equal([1,1,1,1,1,1,1,1,1,1,0,0], test_res.score_extended_2.values)
+    np.testing.assert_equal([0,0,0,0,0,0,0,0,0,1,1,1], test_res.score_2_extended_2.values)
