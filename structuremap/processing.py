@@ -988,6 +988,10 @@ def perform_enrichment_analysis(df: pd.DataFrame,
                                    'roi':[roi],
                                    'n_aa_ptm': seq_ann_qcut_aa[seq_ann_qcut_aa[ptm] == 1].shape[0],
                                    'n_aa_roi': seq_ann_qcut_aa[seq_ann_qcut_aa[roi] == 1].shape[0],
+                                   'n_ptm_in_roi':n_ptm_in_roi,
+                                   'n_ptm_not_in_roi':n_ptm_not_in_roi,
+                                   'n_naked_in_roi':n_naked_in_roi,
+                                   'n_naked_not_in_roi':n_naked_not_in_roi,
                                    'oddsr':[oddsr],
                                    'p':[p]})
 
