@@ -152,6 +152,7 @@ def format_alphafold_data(directory: str,
                                    'x_coord':structure['_atom_site.Cartn_x'],
                                    'y_coord':structure['_atom_site.Cartn_y'],
                                    'z_coord':structure['_atom_site.Cartn_z']})
+                df["protein_number"] = df["protein_number"].astype(np.int32)
 
                 df = df[df.atom_id.isin(['CA','CB','C','N'])].reset_index(drop=True)
                 df = df.pivot(index=['protein_id','protein_number','AA','position','quality'], columns="atom_id")
