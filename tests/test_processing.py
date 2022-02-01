@@ -14,6 +14,7 @@ import Bio.PDB.MMCIF2Dict
 from itertools import groupby
 import unittest
 from scipy.spatial.transform import Rotation as R
+from Bio import PDB
 
 from structuremap.processing import download_alphafold_cif, \
     download_alphafold_pae, \
@@ -195,8 +196,6 @@ class TestProcessing(unittest.TestCase):
                                               coordinate_array_c, coordinate_array_n,
                                               pos, error, 50, 140))
 
-    from Bio import PDB
-
     def test_annotate_accessibility(self, ):
         radius = 12.0
 
@@ -220,7 +219,6 @@ class TestProcessing(unittest.TestCase):
                 'Q7Z6M3.pdb'
             )
         ) as pdbfile:
-            import Bio.PDB as PDB
             p=PDB.PDBParser()
             s=p.get_structure('X', pdbfile)
             m=s[0]
