@@ -50,7 +50,12 @@ class TestProcessing(unittest.TestCase):
         np.testing.assert_equal(invalid, np.array(['O15552yy']))
         np.testing.assert_equal(existing, np.array(['O15552','Q7Z6M3']))
 
-        os.remove(TEST_FOLDER+'Q5VSL9.cif')
+        os.remove(
+            os.path.join(
+                TEST_FOLDER,
+                'Q5VSL9.cif'
+            )
+        )
 
     def test_download_alphafold_pae(self, ):
         valid, invalid, existing = download_alphafold_pae(
@@ -61,7 +66,12 @@ class TestProcessing(unittest.TestCase):
         np.testing.assert_equal(invalid, np.array(['O15552yy']))
         np.testing.assert_equal(existing, np.array(['O15552','Q7Z6M3']))
 
-        os.remove(TEST_FOLDER+'pae_Q5VSL9.hdf')
+        os.remove(
+            os.path.join(
+                TEST_FOLDER,
+                'pae_Q5VSL9.hdf'
+            )
+        )
 
     def test_format_alphafold_data(self, ):
         alphafold_formatted = format_alphafold_data(
