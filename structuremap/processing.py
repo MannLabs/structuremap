@@ -130,7 +130,7 @@ def format_alphafold_data(directory: str,
     alphafold_annotation_l = []
     protein_number = 0
 
-    for file in tqdm.tqdm(os.listdir(directory)):
+    for file in tqdm.tqdm(sorted(os.listdir(directory))):
 
         if file.endswith("cif"):
             filepath = os.path.join(directory, file)
