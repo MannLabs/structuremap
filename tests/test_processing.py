@@ -13,6 +13,7 @@ import re
 import Bio.PDB.MMCIF2Dict
 from itertools import groupby
 import unittest
+from scipy.spatial.transform import Rotation as R
 
 from structuremap.processing import download_alphafold_cif, \
     download_alphafold_pae, \
@@ -94,8 +95,6 @@ class TestProcessing(unittest.TestCase):
         np.testing.assert_equal(2.236068, np.round(get_3d_dist(coordinate_array, coordinate_array, 0, 1), decimals=6))
         np.testing.assert_equal(4.472136, np.round(get_3d_dist(coordinate_array, coordinate_array, 0, 2), decimals=6))
         np.testing.assert_equal(4.472136, np.round(get_3d_dist(coordinate_array, coordinate_array, 2, 0), decimals=6))
-
-    from scipy.spatial.transform import Rotation as R
 
     def rotate_vector_around_axis_scipy(self, vector, axis, theta):
         theta = np.radians(theta)
