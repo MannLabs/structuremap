@@ -1,18 +1,23 @@
 #!python
+
+# builtin
+import json
+import os
+import socket
+import re
+from itertools import groupby
+import urllib.request
+import random
+
+# external
 import numba
 import numpy as np
 import pandas as pd
 import tqdm
 import h5py
-import random
 import statsmodels.stats.multitest
-import urllib.request, json
-import os
-import socket
-import re
 import Bio.PDB.MMCIF2Dict
 import scipy.stats
-from itertools import groupby
 
 def download_alphafold_cif(
     proteins: list,
@@ -199,7 +204,6 @@ def format_alphafold_data(directory: str,
     structure_types = list(alphafold_annotation.structure_group.unique())
     str_oh = pd.get_dummies(alphafold_annotation['structure_group'], dtype='int64')
     alphafold_annotation = alphafold_annotation.join(str_oh)
-    alphafold_annotation["protein_number"] = alphafold_annotation["protein_number"].astype(np.int32)
     return(alphafold_annotation)
 
 @numba.njit

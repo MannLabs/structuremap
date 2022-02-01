@@ -85,8 +85,7 @@ class TestProcessing(unittest.TestCase):
                 'test_alphafold_annotation.csv'
             )
         )
-
-        pd.testing.assert_frame_equal(alphafold_formatted, alphafold_formatted_ini)
+        pd.testing.assert_frame_equal(alphafold_formatted, alphafold_formatted_ini, check_dtype=False)
 
     def test_get_3d_dist(self, ):
         x = np.array([1.1,1.1,1.1,1.1,5.1])
