@@ -23,7 +23,7 @@ import scipy.stats
 def download_alphafold_cif(
     proteins: list,
     out_folder: str,
-    base_url: str = 'https://alphafold.ebi.ac.uk/files/AF-{}-F1-model_v1.cif',
+    alphafold_cif_url: str = 'https://alphafold.ebi.ac.uk/files/AF-{}-F1-model_v1.cif',
     timeout: int = 60,
 ) -> tuple:
     """
@@ -35,7 +35,7 @@ def download_alphafold_cif(
         List (or any other iterable) of UniProt protein accessions for which to download the structures.
     out_folder : str
         Path to the output folder.
-    base_url : str
+    alphafold_cif_url : str
         The base link from where to download cif files.
         The brackets {} are replaced by a protein name from the proteins list.
         Default is 'https://alphafold.ebi.ac.uk/files/AF-{}-F1-model_v1.cif'.
@@ -45,15 +45,15 @@ def download_alphafold_cif(
 
     Returns
     -------
-    : (int, int, int)
-        The number of valid, invalid and existing proteins.
+    : (list, list, list)
+        The of valid, invalid and existing proteins.
     """
     socket.setdefaulttimeout(timeout)
     valid_proteins = []
     invalid_proteins = []
     existing_proteins = []
     for protein in tqdm.tqdm(proteins):
-        name_in = base_url.format(protein)
+        name_in = alphafold_cif_url.format(protein)
         name_out = os.path.join(
             out_folder,
             f"{protein}.cif"
@@ -79,21 +79,32 @@ def download_alphafold_cif(
 
 def download_alphafold_pae(
     proteins: list,
-    out_folder: str
+    out_folder: str,
+    out_format: str = f"pae_{}.hdf",
+    alphafold_pae_url: str = f'https://alphafold.ebi.ac.uk/files/AF-{}-F1-predicted_aligned_error_v1.json',
 ):
     """
-    Function to download paired aligned errors for protein structures predicted by AlphaFold.
+    Function to download paired aligned errors (pae) for protein structures predicted by AlphaFold.
 
     Parameters
     ----------
     proteins : list
-        List of UniProt protein accessions for which to download the structures.
+        List (or any other iterable) of UniProt protein accessions for which to download the structures.
     out_folder : str
         Path to the output folder.
+    out_format : str
+        The default file name of the cif files to be saved.
+        The brackets {} are replaced by a protein name from the proteins list.
+        Default is 'pae_{}.hdf'.
+    alphafold_pae_url : str
+        The base link from where to download pae files.
+        The brackets {} are replaced by a protein name from the proteins list.
+        Default is 'https://alphafold.ebi.ac.uk/files/AF-{}-F1-predicted_aligned_error_v1.json'.
 
     Returns
     -------
-    : (int, int, int)
+    : (list, list, list)
+        The valid, invalid and existing proteins.
     """
     valid_proteins = []
     invalid_proteins = []
@@ -101,23 +112,23 @@ def download_alphafold_pae(
     for protein in tqdm.tqdm(proteins):
         name_out = os.path.join(
             out_folder,
-            f"pae_{protein}.hdf"
+            out_format.format(protein)
         )
         if os.path.isfile(name_out):
             existing_proteins.append(protein)
         else:
             try:
-                name_in = f'https://alphafold.ebi.ac.uk/files/AF-{protein}-F1-predicted_aligned_error_v1.json'
+                name_in = alphafold_pae_url.format(protein)
                 with urllib.request.urlopen(name_in) as url:
                     data = json.loads(url.read().decode())
                 #res1=np.array(data[0]['residue1'], dtype=np.uint16) # change to uint32 in case larger proteins come up in alphafold
                 #res2=np.array(data[0]['residue2'], dtype=np.uint16)
-                dist=np.array(data[0]['distance'])
+                dist = np.array(data[0]['distance'])
 
                 #data_list = [('res1',res1),('res2',res2),('dist',dist)]
-                data_list = [('dist',dist)]
+                data_list = [('dist', dist)]
                 with h5py.File(name_out, 'w') as hdf_root:
-                    for key,data in data_list:
+                    for key, data in data_list:
                         hdf_root.create_dataset(
                                             name=key,
                                             data=data,
@@ -126,10 +137,13 @@ def download_alphafold_pae(
                                         )
                 valid_proteins.append(protein)
             except:
+                # Declare which exceptions are possible and why this leads to invalid proteins.
+                # Now there e.g. HDF IO errors included as well, which should probably be handled differently.
                 invalid_proteins.append(protein)
     print(f"Valid proteins: {len(valid_proteins)}")
     print(f"Invalid proteins: {len(invalid_proteins)}")
     print(f"Existing proteins: {len(existing_proteins)}")
+    # Logging module?
     return(valid_proteins, invalid_proteins, existing_proteins)
 
 def format_alphafold_data(directory: str,
