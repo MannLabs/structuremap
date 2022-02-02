@@ -19,30 +19,41 @@ import statsmodels.stats.multitest
 import Bio.PDB.MMCIF2Dict
 import scipy.stats
 
+
 def download_alphafold_cif(
     proteins: list,
-    out_folder: str
-):
+    out_folder: str,
+    base_url: str = 'https://alphafold.ebi.ac.uk/files/AF-{}-F1-model_v1.cif',
+    timeout: int = 60,
+) -> tuple:
     """
     Function to download .cif files of protein structures predicted by AlphaFold.
 
     Parameters
     ----------
     proteins : list
-        List of UniProt protein accessions for which to download the structures.
+        List (or any other iterable) of UniProt protein accessions for which to download the structures.
     out_folder : str
         Path to the output folder.
+    base_url : str
+        The base link from where to download cif files.
+        The brackets {} are replaced by a protein name from the proteins list.
+        Default is 'https://alphafold.ebi.ac.uk/files/AF-{}-F1-model_v1.cif'.
+    timeout : int
+        Time to wait for reconnection of downloads.
+        Default is 60.
 
     Returns
     -------
     : (int, int, int)
+        The number of valid, invalid and existing proteins.
     """
-    socket.setdefaulttimeout(60) # Time to wait for reconnection of downloads
+    socket.setdefaulttimeout(timeout)
     valid_proteins = []
     invalid_proteins = []
     existing_proteins = []
     for protein in tqdm.tqdm(proteins):
-        name_in = f'https://alphafold.ebi.ac.uk/files/AF-{protein}-F1-model_v1.cif'
+        name_in = base_url.format(protein)
         name_out = os.path.join(
             out_folder,
             f"{protein}.cif"
@@ -54,11 +65,17 @@ def download_alphafold_cif(
                 urllib.request.urlretrieve(name_in, name_out)
                 valid_proteins.append(protein)
             except:
+                # Unclear when this is invalid.
+                # If protein does not exist, if download was timed-out?
+                # Regardless, this certainly should not be a bare except!!!
                 invalid_proteins.append(protein)
     print(f"Valid proteins: {len(valid_proteins)}")
     print(f"Invalid proteins: {len(invalid_proteins)}")
     print(f"Existing proteins: {len(existing_proteins)}")
+    # I would advise to use the logging module,
+    # but this requires to modify the code in numerous places.
     return(valid_proteins, invalid_proteins, existing_proteins)
+
 
 def download_alphafold_pae(
     proteins: list,
