@@ -297,7 +297,7 @@ def rotate_vector_around_axis(vector: np.ndarray,
         3D vector which should be rotated.
     axis : np.ndarray
         3D vector around which the vector should be rotated.
-    theta : float)
+    theta : float
         Angle (in degrees) by which the vector should be rotated around the axis.
 
     Returns
