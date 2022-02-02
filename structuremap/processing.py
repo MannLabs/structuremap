@@ -325,7 +325,8 @@ def rotate_vector_around_axis(vector: np.ndarray,
 def get_gly_vector(coord_a: np.ndarray,
                    coord_c: np.ndarray,
                    coord_n: np.ndarray,
-                   idx_1: int) -> np.ndarray:
+                   idx_1: int,
+                   theta: float = -120) -> np.ndarray:
     """
     Return a pseudo vector Ca -> Cb for a Glycine residue.
     The pseudo vector is centered at the origin and the
@@ -342,6 +343,9 @@ def get_gly_vector(coord_a: np.ndarray,
         Array of 3D coordinates of amino nitrogen atoms across different amino acids.
     idx_1 : int
         Integer to select a specific amino acid in the coordinate arrays.
+    theta : float
+        The theta for the rotation.
+        Default is -120.
 
     Returns
     -------
@@ -354,7 +358,7 @@ def get_gly_vector(coord_a: np.ndarray,
     uv_c = (coord_c[idx_1] - coord_a[idx_1]) / get_3d_dist(coord_c, coord_a, idx_1, idx_1)
 
     # rotation of uv_n around uv_c over -120 deg
-    uv_b = rotate_vector_around_axis(vector=uv_n, axis=uv_c, theta=-120)
+    uv_b = rotate_vector_around_axis(vector=uv_n, axis=uv_c, theta=theta)
 
     return uv_b
 
