@@ -393,7 +393,7 @@ def get_angle(coord_a: np.ndarray,
     : float
         Angle between the side chain of the first amino acid and a second amino acid.
     """
-    if np.isnan(coord_b[idx_1,0]):
+    if np.isnan(coord_b[idx_1, 0]):
         # Get pseudo vector Ca -> Cb for a Gly residue.
         uv_1 = get_gly_vector(coord_a,
                               coord_c,
@@ -401,10 +401,10 @@ def get_angle(coord_a: np.ndarray,
                               idx_1)
     else:
         # Calculate unit vector for Ca1 -> Cb1
-        uv_1 = (coord_b[idx_1]-coord_a[idx_1]) / get_3d_dist(coord_b, coord_a, idx_1, idx_1)
+        uv_1 = (coord_b[idx_1] - coord_a[idx_1]) / get_3d_dist(coord_b, coord_a, idx_1, idx_1)
 
     # Calculate unit vector for Ca1 -> Ca2
-    uv_d = (coord_a[idx_2]-coord_a[idx_1]) / get_3d_dist(coord_a, coord_a, idx_1, idx_2)
+    uv_d = (coord_a[idx_2] - coord_a[idx_1]) / get_3d_dist(coord_a, coord_a, idx_1, idx_2)
 
     # Calculate the angle between the two unit vectors
     dot_p = np.dot(uv_1, uv_d)
