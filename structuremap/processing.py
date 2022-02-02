@@ -234,15 +234,15 @@ def format_alphafold_data(directory: str,
     alphafold_annotation = alphafold_annotation.sort_values(by=['protein_number', 'protein_id', 'position']).reset_index(drop=True)
 
     alphafold_annotation['structure_group'] = [re.sub('_.*', '', i) for i in alphafold_annotation['secondary_structure']]
-    structure_types = list(alphafold_annotation.structure_group.unique())
+    # structure_types = list(alphafold_annotation.structure_group.unique())
     str_oh = pd.get_dummies(alphafold_annotation['structure_group'], dtype='int64')
     alphafold_annotation = alphafold_annotation.join(str_oh)
     return(alphafold_annotation)
 
 
 @numba.njit
-def get_3d_dist(coordinate_array_1: np.ndarray,  # Must be 3d, e.g. np.float64[:,3]
-                coordinate_array_2: np.ndarray,  # Must be 3d, e.g. np.float64[:,3]
+def get_3d_dist(coordinate_array_1: np.ndarray,
+                coordinate_array_2: np.ndarray,
                 idx_1: int,
                 idx_2: int
                 ) -> float:
@@ -255,8 +255,10 @@ def get_3d_dist(coordinate_array_1: np.ndarray,  # Must be 3d, e.g. np.float64[:
     ----------
     coordinate_array_1 : np.ndarray
         Array of 3D coordinates.
+        Must be 3d, e.g. np.float64[:,3]
     coordinate_array_2 : np.ndarray)
         Array of 3D coordinates.
+        Must be 3d, e.g. np.float64[:,3]
     idx_1 : int
         Integer to select an index in coordinate_array_1.
     idx_2 : int
