@@ -578,7 +578,7 @@ def annotate_accessibility(df: pd.DataFrame,
     Returns
     -------
     : pd.DataFrame
-        Dataframe repportinmg the number of neighboring amino acids at the specified
+        Dataframe repporting the number of neighboring amino acids at the specified
         maximum distance and angle per protein, amino acid and position.
     """
     # idxs = np.argsort(df.protein_number.values)
@@ -657,7 +657,7 @@ def annotate_accessibility(df: pd.DataFrame,
     return(accessibility_df)
 
 
-@numba.njit()
+@numba.njit
 def smooth_score(score: np.ndarray,
                  half_window: int
                  ) -> np.ndarray:
@@ -671,7 +671,7 @@ def smooth_score(score: np.ndarray,
     score : np.ndarray
         Array of numeric score values.
     half_window : int
-        Integer specifying the number of positions to consider both  before and after
+        Integer specifying the number of positions to consider both before and after
         a given target position.
 
     Returns
@@ -703,7 +703,7 @@ def get_smooth_score(df: pd.DataFrame,
     Parameters
     ----------
     df : pd.DataFrame
-        Dataframe with AlphaFold annotations.
+        Dataframe with AlphaFold annotations. TODO: which format, obtained from format_alphafold_data function?
     scores : np.ndarray
         Array of column names in the dataframe that should be smoothed.
     half_windows : list
@@ -713,7 +713,7 @@ def get_smooth_score(df: pd.DataFrame,
     Returns
     -------
     : pd.DataFrame
-        Input dataframe with additional columns containing the smoothed scores.
+        Copy of the input dataframe with additional columns containing the smoothed scores.
     """
     df_sorted = df.sort_values(by=['protein_number', 'position']).reset_index(drop=True)
     unique_proteins = df_sorted.protein_number.unique()
@@ -730,7 +730,7 @@ def get_smooth_score(df: pd.DataFrame,
 
         for score in scores:
             for w in half_windows:
-                df_prot[score+'_smooth'+str(w)] = smooth_score(
+                df_prot[f"{score}_smooth{w}""] = smooth_score(
                     score=df_prot[score].values,
                     half_window=w)
 
@@ -1253,7 +1253,7 @@ def annotate_proteins_with_idr_pattern(
     return df_sorted
 
 
-@numba.njit()
+@numba.njit
 def extend_flexible_pattern(
     pattern: np.ndarray,
     window: int
