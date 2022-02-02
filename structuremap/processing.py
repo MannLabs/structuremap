@@ -121,11 +121,11 @@ def download_alphafold_pae(
                 name_in = alphafold_pae_url.format(protein)
                 with urllib.request.urlopen(name_in) as url:
                     data = json.loads(url.read().decode())
-                #res1=np.array(data[0]['residue1'], dtype=np.uint16) # change to uint32 in case larger proteins come up in alphafold
-                #res2=np.array(data[0]['residue2'], dtype=np.uint16)
+                # res1=np.array(data[0]['residue1'], dtype=np.uint16) # change to uint32 in case larger proteins come up in alphafold
+                # res2=np.array(data[0]['residue2'], dtype=np.uint16)
                 dist = np.array(data[0]['distance'])
 
-                #data_list = [('res1',res1),('res2',res2),('dist',dist)]
+                # data_list = [('res1',res1),('res2',res2),('dist',dist)]
                 data_list = [('dist', dist)]
                 with h5py.File(name_out, 'w') as hdf_root:
                     for key, data in data_list:
@@ -146,6 +146,7 @@ def download_alphafold_pae(
     # Logging module?
     return(valid_proteins, invalid_proteins, existing_proteins)
 
+
 def format_alphafold_data(directory: str,
                           protein_ids: list):
     """
@@ -160,7 +161,8 @@ def format_alphafold_data(directory: str,
 
     Returns
     -------
-    : pd.DataTable
+    : pd.DataFrame
+        A dataframe with all the annotations in format: TODO (list columns?)
     """
 
     alphafold_annotation_l = []
@@ -173,24 +175,24 @@ def format_alphafold_data(directory: str,
 
             protein_id = re.sub(r'.cif', '', file)
 
-            if  protein_id in protein_ids:
+            if protein_id in protein_ids:
 
                 protein_number += 1
 
                 structure = Bio.PDB.MMCIF2Dict.MMCIF2Dict(filepath)
 
-                df = pd.DataFrame({'protein_id':structure['_atom_site.pdbx_sifts_xref_db_acc'],
+                df = pd.DataFrame({'protein_id': structure['_atom_site.pdbx_sifts_xref_db_acc'],
                                    'protein_number': protein_number,
-                                   'AA':structure['_atom_site.pdbx_sifts_xref_db_res'],
-                                   'position':structure['_atom_site.label_seq_id'],
-                                   'quality':structure['_atom_site.B_iso_or_equiv'],
-                                   'atom_id':structure['_atom_site.label_atom_id'],
-                                   'x_coord':structure['_atom_site.Cartn_x'],
-                                   'y_coord':structure['_atom_site.Cartn_y'],
-                                   'z_coord':structure['_atom_site.Cartn_z']})
+                                   'AA': structure['_atom_site.pdbx_sifts_xref_db_res'],
+                                   'position': structure['_atom_site.label_seq_id'],
+                                   'quality': structure['_atom_site.B_iso_or_equiv'],
+                                   'atom_id': structure['_atom_site.label_atom_id'],
+                                   'x_coord': structure['_atom_site.Cartn_x'],
+                                   'y_coord': structure['_atom_site.Cartn_y'],
+                                   'z_coord': structure['_atom_site.Cartn_z']})
 
-                df = df[df.atom_id.isin(['CA','CB','C','N'])].reset_index(drop=True)
-                df = df.pivot(index=['protein_id','protein_number','AA','position','quality'], columns="atom_id")
+                df = df[df.atom_id.isin(['CA', 'CB', 'C', 'N'])].reset_index(drop=True)
+                df = df.pivot(index=['protein_id', 'protein_number', 'AA', 'position', 'quality'], columns="atom_id")
                 df = pd.DataFrame(df.to_records())
 
                 df = df.rename(columns={"('x_coord', 'CA')": "x_coord_ca",
@@ -204,7 +206,7 @@ def format_alphafold_data(directory: str,
                                         "('z_coord', 'C')": "z_coord_c",
                                         "('x_coord', 'N')": "x_coord_n",
                                         "('y_coord', 'N')": "y_coord_n",
-                                        "('z_coord', 'N')": "z_coord_n",})
+                                        "('z_coord', 'N')": "z_coord_n"})
 
                 df[['position', 'quality',
                     'x_coord_ca', 'y_coord_ca', 'z_coord_ca',
@@ -223,7 +225,7 @@ def format_alphafold_data(directory: str,
                     end_idx = [int(i) for i in structure['_struct_conf.end_label_seq_id']]
                     note = structure['_struct_conf.conf_type_id']
 
-                    for i in np.arange(0,len(start_idx)):
+                    for i in np.arange(0, len(start_idx)):
                         df['secondary_structure'] = np.where(df['position'].between(start_idx[i],end_idx[i]), note[i], df['secondary_structure'])
 
                 alphafold_annotation_l.append(df)
@@ -231,18 +233,19 @@ def format_alphafold_data(directory: str,
     alphafold_annotation = pd.concat(alphafold_annotation_l)
     alphafold_annotation = alphafold_annotation.sort_values(by=['protein_number', 'protein_id', 'position']).reset_index(drop=True)
 
-    alphafold_annotation['structure_group'] = [re.sub('_.*','',i) for i in alphafold_annotation['secondary_structure']]
+    alphafold_annotation['structure_group'] = [re.sub('_.*', '', i) for i in alphafold_annotation['secondary_structure']]
     structure_types = list(alphafold_annotation.structure_group.unique())
     str_oh = pd.get_dummies(alphafold_annotation['structure_group'], dtype='int64')
     alphafold_annotation = alphafold_annotation.join(str_oh)
     return(alphafold_annotation)
 
+
 @numba.njit
-def get_3d_dist(coordinate_array_1: np.ndarray, # Must be 3d, e.g. np.float64[:,3]
-                coordinate_array_2: np.ndarray, # Must be 3d, e.g. np.float64[:,3]
+def get_3d_dist(coordinate_array_1: np.ndarray,  # Must be 3d, e.g. np.float64[:,3]
+                coordinate_array_2: np.ndarray,  # Must be 3d, e.g. np.float64[:,3]
                 idx_1: int,
                 idx_2: int
-               ) -> float:
+                ) -> float:
     """
     Function to get the distance between two coordinates in 3D space.
     Input are two coordinate arrays and two respective indices that specify
@@ -275,11 +278,12 @@ def get_3d_dist(coordinate_array_1: np.ndarray, # Must be 3d, e.g. np.float64[:,
     )
     return(dist)
 
+
 @numba.njit
 def rotate_vector_around_axis(vector: np.ndarray,
                               axis: np.ndarray,
                               theta: float
-                             ) -> np.ndarray:
+                              ) -> np.ndarray:
     """
     Return the rotation matrix associated with counterclockwise rotation about
     the given axis by theta degrees.
@@ -314,6 +318,7 @@ def rotate_vector_around_axis(vector: np.ndarray,
 
     return rotated_vector
 
+
 @numba.njit
 def get_gly_vector(coord_a: np.ndarray,
                    coord_c: np.ndarray,
@@ -343,13 +348,14 @@ def get_gly_vector(coord_a: np.ndarray,
     """
 
     # get unit vectors
-    uv_n = (coord_n[idx_1]-coord_a[idx_1]) / get_3d_dist(coord_n, coord_a, idx_1, idx_1)
-    uv_c = (coord_c[idx_1]-coord_a[idx_1]) / get_3d_dist(coord_c, coord_a, idx_1, idx_1)
+    uv_n = (coord_n[idx_1] - coord_a[idx_1]) / get_3d_dist(coord_n, coord_a, idx_1, idx_1)
+    uv_c = (coord_c[idx_1] - coord_a[idx_1]) / get_3d_dist(coord_c, coord_a, idx_1, idx_1)
 
     # rotation of uv_n around uv_c over -120 deg
     uv_b = rotate_vector_around_axis(vector=uv_n, axis=uv_c, theta=-120)
 
     return uv_b
+
 
 @numba.njit
 def get_angle(coord_a: np.ndarray,
@@ -358,7 +364,7 @@ def get_angle(coord_a: np.ndarray,
               coord_n: np.ndarray,
               idx_1: int,
               idx_2: int
-             ) -> float:
+              ) -> float:
     """
     Calculate the angle between the vector of the target amino acid's
     side chain (Ca1 -> Cb1) and the vector pointing from the target
@@ -400,7 +406,7 @@ def get_angle(coord_a: np.ndarray,
 
     # Calculate the angle between the two unit vectors
     dot_p = np.dot(uv_1, uv_d)
-    #angle = np.arccos(np.clip(dot_p, -1.0, 1.0))
+    # angle = np.arccos(np.clip(dot_p, -1.0, 1.0))
     angle = np.arccos(dot_p)
 
     # Convert radians in degrees
@@ -408,12 +414,13 @@ def get_angle(coord_a: np.ndarray,
 
     return(angle_deg)
 
+
 @numba.njit
 def get_paired_error(position: np.ndarray,
                      error_dist: np.ndarray,
                      idx_1: int,
                      idx_2: int
-                    ) -> float:
+                     ) -> float:
     """
     Extract paired aligned error of AlphaFold from a complete error matrix (error_dist)
     at specific sequence positions.
@@ -434,10 +441,11 @@ def get_paired_error(position: np.ndarray,
     : float
         Paired aligned error of the first amino acid and a second amino acid.
     """
-    pos1=position[idx_1]
-    pos2=position[idx_2]
+    pos1 = position[idx_1]
+    pos2 = position[idx_2]
     err = error_dist[pos1 - 1, pos2 - 1]
     return(err)
+
 
 @numba.njit
 def get_neighbors(idx_list: np.ndarray,
@@ -449,7 +457,7 @@ def get_neighbors(idx_list: np.ndarray,
                   error_dist: np.ndarray,
                   max_dist: float,
                   max_angle: float
-                 ) -> np.ndarray:
+                  ) -> np.ndarray:
     """
     Get the number of amino acids within the specified distance and angle
     relative to the target amino acid.
@@ -484,7 +492,7 @@ def get_neighbors(idx_list: np.ndarray,
     for x1 in idx_list:
         n_neighbors = 0
         for x2 in idx_list:
-            if x1!=x2:
+            if x1 != x2:
                 paired_error = get_paired_error(
                     position=position,
                     error_dist=error_dist,
@@ -511,6 +519,7 @@ def get_neighbors(idx_list: np.ndarray,
 
     return(np.array(res))
 
+
 @numba.njit
 def find_end(label: int, end: int, values: int) -> int:
     while values[end] == label:
@@ -519,11 +528,12 @@ def find_end(label: int, end: int, values: int) -> int:
             break
     return end
 
+
 def annotate_accessibility(df: pd.DataFrame,
                            max_dist: float,
                            max_angle: float,
                            error_dir: str
-                          ) -> pd.DataFrame:
+                           ) -> pd.DataFrame:
     """
     Half sphere exposure as calculated in https://onlinelibrary.wiley.com/doi/10.1002/prot.20379
     but with paired aligned error metric included.
@@ -546,8 +556,8 @@ def annotate_accessibility(df: pd.DataFrame,
         Dataframe repportinmg the number of neighboring amino acids at the specified
         maximum distance and angle per protein, amino acid and position.
     """
-    #idxs = np.argsort(df.protein_number.values)
-    #df_sorted = df['protein_number', 'position'][idxs]
+    # idxs = np.argsort(df.protein_number.values)
+    # df_sorted = df['protein_number', 'position'][idxs]
     df_sorted = df.sort_values(by=['protein_number', 'position']).reset_index(drop=True)
 
     unique_proteins = df_sorted.protein_number.unique()
@@ -578,8 +588,7 @@ def annotate_accessibility(df: pd.DataFrame,
             error_dist = np.zeros((df_prot.shape[0], df_prot.shape[0]))
             use_pae = 'nopae'
 
-        idx_list = np.arange(0,df_prot.shape[0])
-
+        idx_list = np.arange(0, df_prot.shape[0])
 
         res_a = get_neighbors(
             idx_list=np.array(idx_list),
@@ -611,8 +620,8 @@ def annotate_accessibility(df: pd.DataFrame,
 
     a_AA = [item for sublist in a_AA for item in sublist]
 
-    accessibility_df = pd.DataFrame({'protein_id':proteins,'AA':AA,'position':AA_p})
-    accessibility_df['nAA_'+str(max_dist)+'_'+str(max_angle)+'_'+use_pae] = a_AA
+    accessibility_df = pd.DataFrame({'protein_id': proteins, 'AA': AA, 'position': AA_p})
+    accessibility_df['nAA_' + str(max_dist) + '_' + str(max_angle) + '_' + use_pae] = a_AA
 
     # glycine_vol = 60.1
     # spherical_sector_volume = ((2*(np.pi)*(max_dist**3))/3)*(1-np.cos(np.deg2rad(max_angle)))
@@ -622,10 +631,11 @@ def annotate_accessibility(df: pd.DataFrame,
 
     return(accessibility_df)
 
+
 @numba.njit()
 def smooth_score(score: np.ndarray,
                  half_window: int
-                ) -> np.ndarray:
+                 ) -> np.ndarray:
     """
     Get an average value for each position in a score array, considering all values
     within a window that spans up to half_window positions before and after a given
@@ -657,10 +667,11 @@ def smooth_score(score: np.ndarray,
         smooth_score.append(window_mean)
     return np.array(smooth_score)
 
+
 def get_smooth_score(df: pd.DataFrame,
                      scores: np.ndarray,
                      half_windows: list,
-                    ) -> pd.DataFrame:
+                     ) -> pd.DataFrame:
     """
     Select columns in a dataframe and smooth the values per protein based on a provided window.
 
@@ -695,21 +706,22 @@ def get_smooth_score(df: pd.DataFrame,
         for score in scores:
             for w in half_windows:
                 df_prot[score+'_smooth'+str(w)] = smooth_score(
-                    score = df_prot[score].values,
-                    half_window = w)
+                    score=df_prot[score].values,
+                    half_window=w)
 
         df_out.append(df_prot)
     df_out = pd.concat(df_out)
     return df_out
+
 
 @numba.njit
 def get_avg_3d_dist(idx_list: np.ndarray,
                     coord: np.ndarray,
                     position: np.ndarray,
                     error_dist: np.ndarray,
-                    metric: str='mean',
-                    error_operation: str='minus'
-                   ) -> float:
+                    metric: str = 'mean',
+                    error_operation: str = 'minus'
+                    ) -> float:
     """
     Get average 3D distance between a group of amino acids.
 
@@ -736,17 +748,17 @@ def get_avg_3d_dist(idx_list: np.ndarray,
         Average 3D distance between all selected amino acids.
     """
 
-    if not metric in ['mean','min']:
+    if metric not in ['mean', 'min']:
         raise ValueError('Select mean or min as metric.')
 
-    if not error_operation in ['minus','plus']:
+    if not error_operation in ['minus', 'plus']:
         raise ValueError('Select minus or plus as error_operation.')
 
     metric_dist = []
     for x1 in idx_list:
         all_dist = []
         for x2 in idx_list:
-            if x1!=x2:
+            if x1 != x2:
                 dist_i = get_3d_dist(
                     coordinate_array_1=coord,
                     coordinate_array_2=coord,
@@ -762,12 +774,12 @@ def get_avg_3d_dist(idx_list: np.ndarray,
                 if error_operation == 'minus':
                     dist_error_i = dist_i-error_i
                     if dist_error_i < 0:
-                        dist_error_i = 3.5 # distance should be >= average size of an AA => 3.5 Å
+                        dist_error_i = 3.5  # distance should be >= average size of an AA => 3.5 Å
                     all_dist.append(dist_error_i)
                 elif error_operation == 'plus':
-                    dist_error_i = dist_i+error_i
-                    nAA_diff = abs(position[x1]-position[x2])
-                    nAA_dist = nAA_diff*3.5 # backbone length in Å assuming 3.5 Å per AA
+                    dist_error_i = dist_i + error_i
+                    nAA_diff = abs(position[x1] - position[x2])
+                    nAA_dist = nAA_diff * 3.5  # backbone length in Å assuming 3.5 Å per AA
                     if dist_error_i > nAA_dist:
                         all_dist.append(nAA_dist)
                     else:
@@ -775,7 +787,7 @@ def get_avg_3d_dist(idx_list: np.ndarray,
 
         all_dist_d = np.array(all_dist)
 
-        if metric=='mean':
+        if metric == 'mean':
             m_d = np.mean(all_dist_d)
         elif metric == 'min':
             m_d = np.min(all_dist_d)
@@ -786,11 +798,12 @@ def get_avg_3d_dist(idx_list: np.ndarray,
     avg_metric_dist = np.mean(metric_dist)
     return(avg_metric_dist)
 
+
 @numba.njit
 def get_avg_1d_dist(idx_list: np.ndarray,
                     position: np.ndarray,
-                    metric: str='mean'
-                   ) -> float:
+                    metric: str = 'mean'
+                    ) -> float:
     """
     Get average 1D distance between a group of amino acids.
 
@@ -810,18 +823,18 @@ def get_avg_1d_dist(idx_list: np.ndarray,
         Average 1D distance between all selected amino acids.
     """
 
-    if not metric in ['mean','min']:
+    if metric not in ['mean', 'min']:
         raise ValueError('Select mean or min as metric.')
 
     metric_dist = []
     for x1 in idx_list:
         all_dist = []
         for x2 in idx_list:
-            if x1!=x2:
+            if x1 != x2:
                 all_dist.append(abs(position[x1]-position[x2]))
         all_dist_d = np.array(all_dist)
 
-        if metric=='mean':
+        if metric == 'mean':
             m_d = np.mean(all_dist_d)
         elif metric == 'min':
             m_d = np.min(all_dist_d)
@@ -832,6 +845,7 @@ def get_avg_1d_dist(idx_list: np.ndarray,
     avg_min_dist = np.mean(metric_dist)
     return(avg_min_dist)
 
+
 def get_proximity_pvals(df: pd.DataFrame,
                         ptm_types: np.ndarray,
                         ptm_site_dict: dict,
@@ -840,7 +854,7 @@ def get_proximity_pvals(df: pd.DataFrame,
                         error_operation: str = 'minus',
                         n_random: int = 10000,
                         random_seed: int = 44
-                       ) -> pd.DataFrame:
+                        ) -> pd.DataFrame:
     """
     Get proximity p-values for selected PTMs.
 
@@ -908,7 +922,7 @@ def get_proximity_pvals(df: pd.DataFrame,
                 # subset to ptm possible positions
                 # calculate real distance
                 real_idx = df_ptm_prot.index[df_ptm_prot[ptm_i]==1].tolist()
-                #print(real_idx)
+                # print(real_idx)
                 avg_dist_3d = get_avg_3d_dist(
                     idx_list=np.array(real_idx),
                     coord=np.vstack([
@@ -926,7 +940,7 @@ def get_proximity_pvals(df: pd.DataFrame,
 
                 # get background distribution
                 rand_idx_list = [random.sample(range(n_aa_all), len(real_idx)) for i in np.arange(0,n_random)]
-                #print(rand_idx_list)
+                # print(rand_idx_list)
                 rand_avg_dist_3d = [get_avg_3d_dist(
                     idx_list=np.array(idx_l),
                     coord=np.vstack([
@@ -950,7 +964,6 @@ def get_proximity_pvals(df: pd.DataFrame,
                 pvalue_3d = np.nan
                 pvalue_1d = np.nan
 
-
             pvals_3d.append(pvalue_3d)
             pvals_1d.append(pvalue_1d)
             n_ptms.append(n_aa_mod)
@@ -958,14 +971,14 @@ def get_proximity_pvals(df: pd.DataFrame,
             ptm_type.append(ptm_i)
 
 
-    res_df = pd.DataFrame({'protein_id':proteins, 'ptm':ptm_type,'n_ptms':n_ptms,'pvalue_1d':pvals_1d,'pvalue_3d':pvals_3d})
+    res_df = pd.DataFrame({'protein_id': proteins, 'ptm': ptm_type, 'n_ptms': n_ptms, 'pvalue_1d': pvals_1d, 'pvalue_3d': pvals_3d})
 
     res_df_noNan = res_df.dropna(subset=['pvalue_3d','pvalue_1d']).reset_index(drop=True)
 
     res_df_noNan['pvalue_1d_adj_bh'] = statsmodels.stats.multitest.multipletests(pvals=res_df_noNan.pvalue_1d, alpha=0.1, method='fdr_bh')[1]
     res_df_noNan['pvalue_3d_adj_bh'] = statsmodels.stats.multitest.multipletests(pvals=res_df_noNan.pvalue_3d, alpha=0.1, method='fdr_bh')[1]
-    #res_df_noNan['pvalue_1d_adj_bf'] = statsmodels.stats.multitest.multipletests(pvals=res_df_noNan.pvalue_1d, alpha=0.1, method='bonferroni')[1]
-    #res_df_noNan['pvalue_3d_adj_bf'] = statsmodels.stats.multitest.multipletests(pvals=res_df_noNan.pvalue_3d, alpha=0.1, method='bonferroni')[1]
+    # res_df_noNan['pvalue_1d_adj_bf'] = statsmodels.stats.multitest.multipletests(pvals=res_df_noNan.pvalue_1d, alpha=0.1, method='bonferroni')[1]
+    # res_df_noNan['pvalue_3d_adj_bf'] = statsmodels.stats.multitest.multipletests(pvals=res_df_noNan.pvalue_3d, alpha=0.1, method='bonferroni')[1]
 
     return(res_df_noNan)
 
@@ -1018,17 +1031,17 @@ def perform_enrichment_analysis(df: pd.DataFrame,
                 fisher_table = np.array([[n_ptm_in_roi, n_naked_in_roi], [n_ptm_not_in_roi, n_naked_not_in_roi]])
                 oddsr, p = scipy.stats.fisher_exact(fisher_table, alternative='two-sided')
 
-                res = pd.DataFrame({'quality_cutoff':[q_cut],
-                                   'ptm':[ptm],
-                                   'roi':[roi],
-                                   'n_aa_ptm': seq_ann_qcut_aa[seq_ann_qcut_aa[ptm] == 1].shape[0],
-                                   'n_aa_roi': seq_ann_qcut_aa[seq_ann_qcut_aa[roi] == 1].shape[0],
-                                   'n_ptm_in_roi':n_ptm_in_roi,
-                                   'n_ptm_not_in_roi':n_ptm_not_in_roi,
-                                   'n_naked_in_roi':n_naked_in_roi,
-                                   'n_naked_not_in_roi':n_naked_not_in_roi,
-                                   'oddsr':[oddsr],
-                                   'p':[p]})
+                res = pd.DataFrame({'quality_cutoff': [q_cut],
+                                   'ptm': [ptm],
+                                   'roi': [roi],
+                                   'n_aa_ptm':  seq_ann_qcut_aa[seq_ann_qcut_aa[ptm] == 1].shape[0],
+                                   'n_aa_roi':  seq_ann_qcut_aa[seq_ann_qcut_aa[roi] == 1].shape[0],
+                                   'n_ptm_in_roi': n_ptm_in_roi,
+                                   'n_ptm_not_in_roi': n_ptm_not_in_roi,
+                                   'n_naked_in_roi': n_naked_in_roi,
+                                   'n_naked_not_in_roi': n_naked_not_in_roi,
+                                   'oddsr': [oddsr],
+                                   'p': [p]})
 
                 enrichment.append(res)
 
@@ -1039,6 +1052,7 @@ def perform_enrichment_analysis(df: pd.DataFrame,
         enrichment_df['p_adj_bh'] = statsmodels.stats.multitest.multipletests(pvals=enrichment_df.p, alpha=0.01, method='fdr_bh')[1]
 
     return(enrichment_df)
+
 
 def perform_enrichment_analysis_per_protein(df: pd.DataFrame,
                                             ptm_types: list,
@@ -1086,12 +1100,12 @@ def perform_enrichment_analysis_per_protein(df: pd.DataFrame,
         df_prot = df_sorted[start:end].reset_index(drop=True)
         protein_accession = df_prot.protein_id.values[0]
 
-        res = perform_enrichment_analysis(df = df_prot,
-                                          ptm_types = ptm_types,
-                                          rois = rois,
-                                          quality_cutoffs = quality_cutoffs,
-                                          ptm_site_dict = ptm_site_dict,
-                                          multiple_testing = False)
+        res = perform_enrichment_analysis(df=df_prot,
+                                          ptm_types=ptm_types,
+                                          rois=rois,
+                                          quality_cutoffs=quality_cutoffs,
+                                          ptm_site_dict=ptm_site_dict,
+                                          multiple_testing=False)
         res.insert(loc=0, column='protein_id', value=np.repeat(protein_accession, res.shape[0]))
 
         enrichment_list.append(res)
@@ -1105,10 +1119,11 @@ def perform_enrichment_analysis_per_protein(df: pd.DataFrame,
 
     return enrichment_per_protein
 
+
 def find_idr_pattern(
-    idr_list : list,
-    min_structured_length : int = 100,
-    max_unstructured_length : int = 30
+    idr_list: list,
+    min_structured_length: int = 100,
+    max_unstructured_length: int = 30
 ) -> bool:
     """
     Find short intrinsically disordered regions.
@@ -1129,7 +1144,7 @@ def find_idr_pattern(
     : list
         List of start end end positions of short IDRs.
     """
-    window = np.array([0,1,2])
+    window = np.array([0, 1, 2])
     i = 0
     pattern = False
     pos_list = list()
@@ -1149,10 +1164,11 @@ def find_idr_pattern(
 
     return pattern, pos_list
 
+
 def annotate_proteins_with_idr_pattern(
-    df : pd.DataFrame,
-    min_structured_length : int = 100,
-    max_unstructured_length : int = 30
+    df: pd.DataFrame,
+    min_structured_length: int = 100,
+    max_unstructured_length: int = 30
 ) -> pd.DataFrame:
     """
     Find short intrinsically disordered regions.
@@ -1194,8 +1210,8 @@ def annotate_proteins_with_idr_pattern(
 
         idr_list = [[k, len(list(g))] for k, g in groupby(df_prot.IDR.values)]
         pattern = find_idr_pattern(idr_list,
-                                   min_structured_length = min_structured_length,
-                                   max_unstructured_length = max_unstructured_length)
+                                   min_structured_length=min_structured_length,
+                                   max_unstructured_length=max_unstructured_length)
 
         pattern_position_list = list()
         if pattern[0]:
@@ -1203,13 +1219,14 @@ def annotate_proteins_with_idr_pattern(
             loop_pattern.append(pattern[0])
             pattern_position.append(pattern[1])
 
-            pattern_position_list = pattern_position_list + [list(np.arange(p[0],p[1]+1)) for p in pattern[1]]
+            pattern_position_list = pattern_position_list + [list(np.arange(p[0], p[1] + 1)) for p in pattern[1]]
             pattern_position_list = [item for sublist in pattern_position_list for item in sublist]
 
-            df_sorted.loc[(df_sorted.protein_number==protein_i) &
-                      (df_sorted.position.isin(pattern_position_list)),'flexible_pattern'] = 1
+            df_sorted.loc[(df_sorted.protein_number == protein_i) &
+                      (df_sorted.position.isin(pattern_position_list)), 'flexible_pattern'] = 1
 
     return df_sorted
+
 
 @numba.njit()
 def extend_flexible_pattern(
@@ -1244,6 +1261,7 @@ def extend_flexible_pattern(
         window_max = np.max(window_patterns)
         extended_pattern.append(window_max)
     return np.array(extended_pattern)
+
 
 def get_extended_flexible_pattern(
     df: pd.DataFrame,
@@ -1283,9 +1301,9 @@ def get_extended_flexible_pattern(
 
         for pattern in patterns:
             for w in windows:
-                df_prot[pattern+'_extended_'+str(w)] = extend_flexible_pattern(
-                    pattern = df_prot[pattern].values,
-                    window = w)
+                df_prot[pattern + '_extended_' + str(w)] = extend_flexible_pattern(
+                    pattern=df_prot[pattern].values,
+                    window=w)
 
         df_out.append(df_prot)
     df_out = pd.concat(df_out)
