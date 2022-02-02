@@ -80,8 +80,8 @@ def download_alphafold_cif(
 def download_alphafold_pae(
     proteins: list,
     out_folder: str,
-    out_format: str = f"pae_{}.hdf",
-    alphafold_pae_url: str = f'https://alphafold.ebi.ac.uk/files/AF-{}-F1-predicted_aligned_error_v1.json',
+    out_format: str = "pae_{}.hdf",
+    alphafold_pae_url: str = 'https://alphafold.ebi.ac.uk/files/AF-{}-F1-predicted_aligned_error_v1.json',
 ):
     """
     Function to download paired aligned errors (pae) for protein structures predicted by AlphaFold.
