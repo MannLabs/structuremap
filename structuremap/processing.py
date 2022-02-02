@@ -730,7 +730,7 @@ def get_smooth_score(df: pd.DataFrame,
 
         for score in scores:
             for w in half_windows:
-                df_prot[f"{score}_smooth{w}""] = smooth_score(
+                df_prot[f"{score}_smooth{w}"] = smooth_score(
                     score=df_prot[score].values,
                     half_window=w)
 
@@ -861,7 +861,7 @@ def get_avg_1d_dist(idx_list: np.ndarray,
         all_dist = []
         for x2 in idx_list:
             if x1 != x2:
-                all_dist.append(abs(position[x1]-position[x2]))
+                all_dist.append(abs(position[x1] - position[x2]))
         all_dist_d = np.array(all_dist)
 
         if metric == 'mean':
