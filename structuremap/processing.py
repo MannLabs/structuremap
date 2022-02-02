@@ -450,7 +450,7 @@ def get_paired_error(position: np.ndarray,
 
 
 @numba.njit
-def get_neighbors(idx_list: np.ndarray,
+def get_neighbors(idx_list: np.ndarray, # Technically this is not a list and it could/should be renamed.
                   coord_a: np.ndarray,
                   coord_b: np.ndarray,
                   coord_c: np.ndarray,
