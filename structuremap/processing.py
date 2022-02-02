@@ -527,7 +527,7 @@ def get_neighbors(idx_list: np.ndarray, # Technically this is not a list and it 
 
 
 @numba.njit
-def find_end(label: int, end: int, values: np.ndarray) -> int:
+def find_end(label: int, start_index: int, values: np.ndarray) -> int:
     """Find when the label changes.
 
     This assumes a sorted values array
@@ -536,22 +536,22 @@ def find_end(label: int, end: int, values: np.ndarray) -> int:
     ----------
     label : int
         The label of interest.
-    end : int
-        The previous end index  of the previous label,
-        which normally is the start index for the current label.
+    start_index : int
+        The previous endindex index of the previous label,
+        which normally is the start_index for the current label.
     values : int
         An array with values.
 
     Returns
     -------
     int
-        The end index of the label in values.
+        The end_index index of the label in values.
     """
-    while values[end] == label:
-        end += 1
-        if end == len(values):
+    while values[start_index] == label:
+        start_index += 1
+        if start_index == len(values):
             break
-    return end
+    return start_index
 
 
 def annotate_accessibility(df: pd.DataFrame,
