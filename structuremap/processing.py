@@ -740,12 +740,13 @@ def get_smooth_score(df: pd.DataFrame,
 
 
 @numba.njit
-def get_avg_3d_dist(idx_list: np.ndarray,
+def get_avg_3d_dist(idx_list: np.ndarray,  # as before, technically not a list but an array. Rename?
                     coord: np.ndarray,
                     position: np.ndarray,
                     error_dist: np.ndarray,
                     metric: str = 'mean',
-                    error_operation: str = 'minus'
+                    error_operation: str = 'minus',
+                    average_aa_size: float = 3.5,
                     ) -> float:
     """
     Get average 3D distance between a group of amino acids.
@@ -766,6 +767,9 @@ def get_avg_3d_dist(idx_list: np.ndarray,
     error_operation : str
         Metric to include paired aligned error in the distance calculation.
         'minus' or 'plus' can be chosen. Default is 'minus'.
+    average_aa_size : float
+        Average size of an AA.
+        Default is 3.5 Å
 
     Returns
     -------
@@ -776,7 +780,7 @@ def get_avg_3d_dist(idx_list: np.ndarray,
     if metric not in ['mean', 'min']:
         raise ValueError('Select mean or min as metric.')
 
-    if not error_operation in ['minus', 'plus']:
+    if error_operation not in ['minus', 'plus']:
         raise ValueError('Select minus or plus as error_operation.')
 
     metric_dist = []
@@ -797,19 +801,20 @@ def get_avg_3d_dist(idx_list: np.ndarray,
                     idx_2=x2)
 
                 if error_operation == 'minus':
-                    dist_error_i = dist_i-error_i
-                    if dist_error_i < 0:
-                        dist_error_i = 3.5  # distance should be >= average size of an AA => 3.5 Å
+                    dist_error_i = dist_i - error_i
+                    if dist_error_i < 0:  # Should this not be: if dist_error_i < average_aa_size:
+                        dist_error_i = average_aa_size
                     all_dist.append(dist_error_i)
                 elif error_operation == 'plus':
                     dist_error_i = dist_i + error_i
                     nAA_diff = abs(position[x1] - position[x2])
-                    nAA_dist = nAA_diff * 3.5  # backbone length in Å assuming 3.5 Å per AA
+                    nAA_dist = nAA_diff * average_aa_size
                     if dist_error_i > nAA_dist:
                         all_dist.append(nAA_dist)
                     else:
                         all_dist.append(dist_error_i)
 
+        # Probably the 5 lines below can be optimized, but likely not worth the speed improvement?
         all_dist_d = np.array(all_dist)
 
         if metric == 'mean':
