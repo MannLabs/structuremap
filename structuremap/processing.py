@@ -246,24 +246,24 @@ def format_alphafold_data(
 
                 alphafold_annotation_l.append(df)
 
-
     alphafold_annotation = pd.concat(alphafold_annotation_l)
     alphafold_annotation = alphafold_annotation.sort_values(
         by=['protein_number', 'position']).reset_index(drop=True)
 
     alphafold_annotation['structure_group'] = [re.sub('_.*', '', i) for i in alphafold_annotation['secondary_structure']]
-    
+
     str_oh = pd.get_dummies(alphafold_annotation['structure_group'], dtype='int64')
     alphafold_annotation = alphafold_annotation.join(str_oh)
     return(alphafold_annotation)
 
 
 @numba.njit
-def get_3d_dist(coordinate_array_1: np.ndarray,
-                coordinate_array_2: np.ndarray,
-                idx_1: int,
-                idx_2: int
-                ) -> float:
+def get_3d_dist(
+    coordinate_array_1: np.ndarray,
+    coordinate_array_2: np.ndarray,
+    idx_1: int,
+    idx_2: int
+) -> float:
     """
     Function to get the distance between two coordinates in 3D space.
     Input are two coordinate arrays and two respective indices that specify
@@ -300,10 +300,11 @@ def get_3d_dist(coordinate_array_1: np.ndarray,
 
 
 @numba.njit
-def rotate_vector_around_axis(vector: np.ndarray,
-                              axis: np.ndarray,
-                              theta: float
-                              ) -> np.ndarray:
+def rotate_vector_around_axis(
+    vector: np.ndarray,
+    axis: np.ndarray,
+    theta: float
+) -> np.ndarray:
     """
     Return the rotation matrix associated with counterclockwise rotation about
     the given axis by theta degrees.
@@ -329,22 +330,21 @@ def rotate_vector_around_axis(vector: np.ndarray,
     b, c, d = -axis * np.sin(theta / 2.0)
     aa, bb, cc, dd = a * a, b * b, c * c, d * d
     bc, ad, ac, ab, bd, cd = b * c, a * d, a * c, a * b, b * d, c * d
-
     rotation_matrix = np.array([[aa + bb - cc - dd, 2 * (bc + ad), 2 * (bd - ac)],
                                 [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab)],
                                 [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc]])
-
     rotated_vector = np.dot(rotation_matrix, vector)
-
     return rotated_vector
 
 
 @numba.njit
-def get_gly_vector(coord_a: np.ndarray,
-                   coord_c: np.ndarray,
-                   coord_n: np.ndarray,
-                   idx_1: int,
-                   theta: float = -120) -> np.ndarray:
+def get_gly_vector(
+    coord_a: np.ndarray,
+    coord_c: np.ndarray,
+    coord_n: np.ndarray,
+    idx_1: int,
+    theta: float = -120
+) -> np.ndarray:
     """
     Return a pseudo vector Ca -> Cb for a Glycine residue.
     The pseudo vector is centered at the origin and the
@@ -370,25 +370,22 @@ def get_gly_vector(coord_a: np.ndarray,
     : np.ndarray
         Pseudo vector Ca -> Cb for a Glycine residue.
     """
-
     # get unit vectors
     uv_n = (coord_n[idx_1] - coord_a[idx_1]) / get_3d_dist(coord_n, coord_a, idx_1, idx_1)
     uv_c = (coord_c[idx_1] - coord_a[idx_1]) / get_3d_dist(coord_c, coord_a, idx_1, idx_1)
-
     # rotation of uv_n around uv_c over -120 deg
     uv_b = rotate_vector_around_axis(vector=uv_n, axis=uv_c, theta=theta)
-
     return uv_b
 
-
 @numba.njit
-def get_angle(coord_a: np.ndarray,
-              coord_b: np.ndarray,
-              coord_c: np.ndarray,
-              coord_n: np.ndarray,
-              idx_1: int,
-              idx_2: int
-              ) -> float:
+def get_angle(
+    coord_a: np.ndarray,
+    coord_b: np.ndarray,
+    coord_c: np.ndarray,
+    coord_n: np.ndarray,
+    idx_1: int,
+    idx_2: int
+) -> float:
     """
     Calculate the angle between the vector of the target amino acid's
     side chain (Ca1 -> Cb1) and the vector pointing from the target
@@ -424,37 +421,34 @@ def get_angle(coord_a: np.ndarray,
     else:
         # Calculate unit vector for Ca1 -> Cb1
         uv_1 = (coord_b[idx_1] - coord_a[idx_1]) / get_3d_dist(coord_b, coord_a, idx_1, idx_1)
-
     # Calculate unit vector for Ca1 -> Ca2
     uv_d = (coord_a[idx_2] - coord_a[idx_1]) / get_3d_dist(coord_a, coord_a, idx_1, idx_2)
-
     # Calculate the angle between the two unit vectors
     dot_p = np.dot(uv_1, uv_d)
     # angle = np.arccos(np.clip(dot_p, -1.0, 1.0))
     angle = np.arccos(dot_p)
-
     # Convert radians in degrees
     angle_deg = np.rad2deg(angle)
-
     return(angle_deg)
 
-
 @numba.njit
-def get_paired_error(position: np.ndarray,
-                     error_dist: np.ndarray,
-                     idx_1: int,
-                     idx_2: int
-                     ) -> float:
+def get_paired_error(
+    position: np.ndarray,
+    error_dist: np.ndarray,
+    idx_1: int,
+    idx_2: int
+) -> float:
     """
-    Extract paired aligned error of AlphaFold from a complete error matrix (error_dist)
-    at specific sequence positions.
+    Extract paired aligned error of AlphaFold from a complete
+    error matrix (error_dist) at specific sequence positions.
 
     Parameters
     ----------
     position : np.ndarray
         Array of amino acid positions from which to choose specific indeces.
     error_dist: : np.ndarray
-        Matrix of paired aligned errors of AlphaFold across all amino acids in a protein qequence.
+        Matrix of paired aligned errors of AlphaFold across all amino acids
+        in a protein qequence.
     idx_1 : int
         Integer to select a first amino acid in the position array.
     idx_2 : int
@@ -472,16 +466,17 @@ def get_paired_error(position: np.ndarray,
 
 
 @numba.njit
-def get_neighbors(idx_list: np.ndarray, # Technically this is not a list and it could/should be renamed.
-                  coord_a: np.ndarray,
-                  coord_b: np.ndarray,
-                  coord_c: np.ndarray,
-                  coord_n: np.ndarray,
-                  position: np.ndarray,
-                  error_dist: np.ndarray,
-                  max_dist: float,
-                  max_angle: float
-                  ) -> np.ndarray:
+def get_neighbors(
+    idx_list: np.ndarray, # Technically this is not a list and it could/should be renamed.
+    coord_a: np.ndarray,
+    coord_b: np.ndarray,
+    coord_c: np.ndarray,
+    coord_n: np.ndarray,
+    position: np.ndarray,
+    error_dist: np.ndarray,
+    max_dist: float,
+    max_angle: float
+) -> np.ndarray:
     """
     Get the number of amino acids within the specified distance and angle
     relative to the target amino acid.
@@ -538,17 +533,19 @@ def get_neighbors(idx_list: np.ndarray, # Technically this is not a list and it 
                             idx_2=x2)
                         if angle <= max_angle:
                             n_neighbors += 1
-
         res.append(n_neighbors)
-
     return(np.array(res))
 
 
 @numba.njit
-def find_end(label: int, start_index: int, values: np.ndarray) -> int:
+def find_end(
+    label: int,
+    start_index: int,
+    values: np.ndarray
+) -> int:
     """Find when the label changes.
 
-    This assumes a sorted values array
+    This assumes a sorted values array.
 
     Parameters
     ----------
@@ -572,11 +569,12 @@ def find_end(label: int, start_index: int, values: np.ndarray) -> int:
     return start_index
 
 
-def annotate_accessibility(df: pd.DataFrame,
-                           max_dist: float,
-                           max_angle: float,
-                           error_dir: str
-                           ) -> pd.DataFrame:
+def annotate_accessibility(
+    df: pd.DataFrame,
+    max_dist: float,
+    max_angle: float,
+    error_dir: str
+) -> pd.DataFrame:
     """
     Half sphere exposure as calculated in https://onlinelibrary.wiley.com/doi/10.1002/prot.20379
     but with paired aligned error metric included.
