@@ -568,6 +568,18 @@ def find_end(
             break
     return start_index
 
+def partition_df_by_prots(df):
+    if not df.protein_number.is_monotonic_increasing:
+        df = df.sort_values(by='protein_number').reset_index(drop=True)
+    unique_proteins = df.protein_number.unique()
+    end = 0
+    for protein_i in tqdm.tqdm(unique_proteins):
+        start = end
+        end = find_end(protein_i, end, df.protein_number.values)
+        prot_df = df[start:end]
+        if not prot_df.position.is_monotonic_increasing:
+            prot_df.sort_values(by='position', inplace=True)
+        yield prot_df.reset_index(drop=True)
 
 def annotate_accessibility(
     df: pd.DataFrame,
@@ -598,27 +610,13 @@ def annotate_accessibility(
         Dataframe repporting the number of neighboring amino acids at the specified
         maximum distance and angle per protein, amino acid and position.
     """
-    # idxs = np.argsort(df.protein_number.values)
-    # df_sorted = df['protein_number', 'position'][idxs]
-    df_sorted = df.sort_values(by=['protein_number', 'position']).reset_index(drop=True)
-    # Is the df not already sorted when it is inputted?
-    # Quick check possible with: pd.Series.is_monotonic_increasing
-
-    unique_proteins = df_sorted.protein_number.unique()
-
-    end = 0
 
     proteins = list()
     AA = list()
     AA_p = list()
     a_AA = list()
 
-    for protein_i in tqdm.tqdm(unique_proteins):
-
-        start = end
-        end = find_end(protein_i, end, df_sorted.protein_number.values)
-
-        df_prot = df_sorted[start:end].reset_index(drop=True)
+    for df_prot in partition_df_by_prots(df):
 
         protein_accession = df_prot.protein_id.values[0]
 
