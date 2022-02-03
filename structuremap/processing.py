@@ -26,6 +26,7 @@ def download_alphafold_cif(
     out_format: str = "{}.cif",
     alphafold_cif_url: str = 'https://alphafold.ebi.ac.uk/files/AF-{}-F1-model_v1.cif',
     timeout: int = 60,
+    verbose_log: bool = False,
 ) -> tuple:
     """
     Function to download .cif files of protein structures predicted by AlphaFold.
@@ -47,7 +48,7 @@ def download_alphafold_cif(
     Returns
     -------
     : (list, list, list)
-        The number of valid, invalid and existing proteins.
+        The lists of valid, invalid and existing protein accessions.
     """
     socket.setdefaulttimeout(timeout)
     valid_proteins = []
@@ -65,10 +66,9 @@ def download_alphafold_cif(
             try:
                 urllib.request.urlretrieve(name_in, name_out)
                 valid_proteins.append(protein)
-            except:
-                # Unclear when this is invalid.
-                # If protein does not exist, if download was timed-out?
-                # Regardless, this certainly should not be a bare except!!!
+            except urllib.error.HTTPError:
+                if verbose_log:
+                    logging.info(f"Protein {protein} not available for download.")
                 invalid_proteins.append(protein)
     logging.info(f"Valid proteins: {len(valid_proteins)}")
     logging.info(f"Invalid proteins: {len(invalid_proteins)}")
