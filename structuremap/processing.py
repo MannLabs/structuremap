@@ -86,7 +86,7 @@ def download_alphafold_pae(
     alphafold_pae_url: str = 'https://alphafold.ebi.ac.uk/files/AF-{}-F1-predicted_aligned_error_v1.json',
     timeout: int = 60,
     verbose_log: bool = False,
-):
+) -> tuple:
     """
     Function to download paired aligned errors (pae) for protein structures predicted by AlphaFold.
 
@@ -154,8 +154,10 @@ def download_alphafold_pae(
     return(valid_proteins, invalid_proteins, existing_proteins)
 
 
-def format_alphafold_data(directory: str,
-                          protein_ids: list):
+def format_alphafold_data(
+    directory: str,
+    protein_ids: list,
+) -> pd.DataFrame:
     """
     Function to import structure files and format them into a combined dataframe.
 
@@ -165,11 +167,18 @@ def format_alphafold_data(directory: str,
         Path to the folder with all .cif files.
     proteins : list
         List of UniProt protein accessions to create an annotation table.
+        If an empty list is provided, all proteins in the provided directory
+        are used to create the annotation table.
 
     Returns
     -------
     : pd.DataFrame
-        A dataframe with all the annotations in format: TODO (list columns?)
+        A dataframe with structural information presented in following columns:
+        ['protein_id', 'protein_number', 'AA', 'position', 'quality',
+        'x_coord_c', 'x_coord_ca', 'x_coord_cb', 'x_coord_n', 'y_coord_c',
+        'y_coord_ca', 'y_coord_cb', 'y_coord_n', 'z_coord_c', 'z_coord_ca',
+        'z_coord_cb', 'z_coord_n', 'secondary_structure', 'structure_group',
+        'BEND', 'HELX', 'STRN', 'TURN', 'unstructured']
     """
 
     alphafold_annotation_l = []
@@ -182,10 +191,7 @@ def format_alphafold_data(directory: str,
 
             protein_id = re.sub(r'.cif', '', file)
 
-            if protein_id in protein_ids:
-                # What if protein_id not in protein_ids?
-                # Raise error or at least print a warning message?
-                # Also possible to provide an "empty" protein_ids list which automatically takes all proteins in the folder?
+            if ((protein_id in protein_ids) or (len(protein_ids)==0)):
 
                 protein_number += 1
 
@@ -202,7 +208,11 @@ def format_alphafold_data(directory: str,
                                    'z_coord': structure['_atom_site.Cartn_z']})
 
                 df = df[df.atom_id.isin(['CA', 'CB', 'C', 'N'])].reset_index(drop=True)
-                df = df.pivot(index=['protein_id', 'protein_number', 'AA', 'position', 'quality'], columns="atom_id")
+                df = df.pivot(index=['protein_id',
+                                     'protein_number',
+                                     'AA', 'position',
+                                     'quality'],
+                              columns="atom_id")
                 df = pd.DataFrame(df.to_records())
 
                 df = df.rename(columns={"('x_coord', 'CA')": "x_coord_ca",
@@ -228,17 +238,21 @@ def format_alphafold_data(directory: str,
                     note = structure['_struct_conf.conf_type_id']
 
                     for i in np.arange(0, len(start_idx)):
-                        df['secondary_structure'] = np.where(df['position'].between(start_idx[i],end_idx[i]), note[i], df['secondary_structure'])
+                        df['secondary_structure'] = np.where(
+                            df['position'].between(start_idx[i],
+                                                   end_idx[i]),
+                                                   note[i],
+                                                   df['secondary_structure'])
 
                 alphafold_annotation_l.append(df)
 
+
     alphafold_annotation = pd.concat(alphafold_annotation_l)
-    alphafold_annotation = alphafold_annotation.sort_values(by=['protein_number', 'protein_id', 'position']).reset_index(drop=True)
-    # Isn't the sorting by protein_number and protein_id redundant?
-    # Probably faster if you skip the protein_id
+    alphafold_annotation = alphafold_annotation.sort_values(
+        by=['protein_number', 'position']).reset_index(drop=True)
 
     alphafold_annotation['structure_group'] = [re.sub('_.*', '', i) for i in alphafold_annotation['secondary_structure']]
-    # structure_types = list(alphafold_annotation.structure_group.unique())
+    
     str_oh = pd.get_dummies(alphafold_annotation['structure_group'], dtype='int64')
     alphafold_annotation = alphafold_annotation.join(str_oh)
     return(alphafold_annotation)
