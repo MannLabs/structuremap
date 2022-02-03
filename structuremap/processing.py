@@ -227,7 +227,7 @@ def format_alphafold_data(directory: str,
 
     alphafold_annotation = pd.concat(alphafold_annotation_l)
     alphafold_annotation = alphafold_annotation.sort_values(by=['protein_number', 'protein_id', 'position']).reset_index(drop=True)
-    # Isn't the sorting by protein_number and protein_id redundant? 
+    # Isn't the sorting by protein_number and protein_id redundant?
     # Probably faster if you skip the protein_id
 
     alphafold_annotation['structure_group'] = [re.sub('_.*', '', i) for i in alphafold_annotation['secondary_structure']]
@@ -564,6 +564,7 @@ def annotate_accessibility(df: pd.DataFrame,
     ----------
     df : pd.DataFrame
         pd.DataFrame of formatted AlphaFold data across various proteins.
+        TODO: from which internal function? Note that this is good to mention for other arguments in other functions as well to show how functions are connected
     max_dist : float
         Float specifying the maximum distance between two amino acids.
     max_angle : float
@@ -581,6 +582,8 @@ def annotate_accessibility(df: pd.DataFrame,
     # idxs = np.argsort(df.protein_number.values)
     # df_sorted = df['protein_number', 'position'][idxs]
     df_sorted = df.sort_values(by=['protein_number', 'position']).reset_index(drop=True)
+    # Is the df not already sorted when it is inputted?
+    # Quick check possible with: pd.Series.is_monotonic_increasing
 
     unique_proteins = df_sorted.protein_number.unique()
 
@@ -601,7 +604,10 @@ def annotate_accessibility(df: pd.DataFrame,
         protein_accession = df_prot.protein_id.values[0]
 
         if error_dir is not None:
-            with h5py.File(r''+error_dir+'/pae_'+protein_accession+'.hdf','r') as hdf_root:
+            with h5py.File(r''+error_dir+'/pae_'+protein_accession+'.hdf', 'r') as hdf_root:
+                # Always use os.path.join. Windows and linux / are not necessarily the same!
+                # Using + for string concatenation should be considered deprecated.
+                # Use f-strings or "".join functions.
                 error_dist = hdf_root['dist'][...]
             size = int(np.sqrt(len(error_dist)))
             error_dist = error_dist.reshape(size, size)
@@ -613,7 +619,7 @@ def annotate_accessibility(df: pd.DataFrame,
         idx_list = np.arange(0, df_prot.shape[0])
 
         res_a = get_neighbors(
-            idx_list=np.array(idx_list),
+            idx_list=idx_list,
             coord_a=np.vstack([df_prot.x_coord_ca.values,
                               df_prot.y_coord_ca.values,
                               df_prot.z_coord_ca.values]).T,
@@ -626,24 +632,29 @@ def annotate_accessibility(df: pd.DataFrame,
             coord_n=np.vstack([df_prot.x_coord_n.values,
                               df_prot.y_coord_n.values,
                               df_prot.z_coord_n.values]).T,
-            position=df_prot.position.values.astype(np.int64),
+          # If this step is slow, consider avoiding the vstack to create new arrays
+          # Alternatively, it might be faster to use e.g. df[["x", "y", "z"]].values as pandas might force this into a view rather than a new array
+            position=df_prot.position.values.astype(np.int64),  # should this cast not be enforced on the base df already?
             error_dist=error_dist,
             max_dist=max_dist,
             max_angle=max_angle)
 
         proteins.append(df_prot.protein_id.values)
+        # using numeracal prot_numbers might be better.
+        # In general it is good practive to reduce strings/objects in arrays/dfs as much possible. Especially try to avoid repetetion of such types and just use indices and a reference array. Rarely do you need this actual values anyways.
         AA.append(df_prot.AA.values)
         AA_p.append(df_prot.position.values)
         a_AA.append(res_a)
 
-    proteins = [item for sublist in proteins for item in sublist]
-    AA = [item for sublist in AA for item in sublist]
-    AA_p = [item for sublist in AA_p for item in sublist]
+    proteins = np.concatenate(proteins)
+    AA = np.concatenate(AA)
+    AA_p = np.concatenate(AA_p)
 
-    a_AA = [item for sublist in a_AA for item in sublist]
+    a_AA = np.concatenate(a_AA)
 
     accessibility_df = pd.DataFrame({'protein_id': proteins, 'AA': AA, 'position': AA_p})
     accessibility_df['nAA_' + str(max_dist) + '_' + str(max_angle) + '_' + use_pae] = a_AA
+    # f_string? Again, consider using indices instead
 
     # glycine_vol = 60.1
     # spherical_sector_volume = ((2*(np.pi)*(max_dist**3))/3)*(1-np.cos(np.deg2rad(max_angle)))
