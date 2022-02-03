@@ -1159,7 +1159,7 @@ def perform_enrichment_analysis_per_protein(df: pd.DataFrame,
 
     enrichment_per_protein = pd.concat(enrichment_list)
     enrichment_per_protein = enrichment_per_protein[(enrichment_per_protein.n_aa_ptm >= 2) & (enrichment_per_protein.n_aa_roi >= enrichment_per_protein.n_aa_ptm)]
-    enrichment_per_protein = enrichment_per_protein.reset_index(drop=True)
+    enrichment_per_protein.reset_index(drop=True, inplace=True)
 
     enrichment_per_protein['p_adj_bf'] = statsmodels.stats.multitest.multipletests(pvals=enrichment_per_protein.p, alpha=0.01, method='bonferroni')[1]
     enrichment_per_protein['p_adj_bh'] = statsmodels.stats.multitest.multipletests(pvals=enrichment_per_protein.p, alpha=0.01, method='fdr_bh')[1]
