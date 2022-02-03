@@ -1171,14 +1171,14 @@ def find_idr_pattern(
     idr_list: list,
     min_structured_length: int = 100,
     max_unstructured_length: int = 30
-) -> bool:
+) -> tuple:
     """
     Find short intrinsically disordered regions.
 
     Parameters
     ----------
     idr_list : list
-        Nested list specifying the binary IDR condition and its length. For example: [1,10],[0,30],[1,5]].
+        Nested list specifying the binary IDR condition and its length. For example: [[1,10],[0,30],[1,5]].
     min_structured_length : int
         Integer specifying the minimum number of amino acids in flanking structured regions.
     max_unstructured_length : int
@@ -1186,17 +1186,15 @@ def find_idr_pattern(
 
     Returns
     -------
-    : bool
-        If a pattern was found.
-    : list
-        List of start end end positions of short IDRs.
+    : tuple
+        (bool, list) If a pattern was found and the list of start end end positions of short IDRs.
     """
     window = np.array([0, 1, 2])
     i = 0
     pattern = False
     pos_list = list()
 
-    while (i < len(idr_list)-2):
+    while i < (len(idr_list) - 2):
         window_i = window + i
 
         if idr_list[window_i[0]][0] == 0:
@@ -1204,8 +1202,8 @@ def find_idr_pattern(
                 if idr_list[window_i[1]][1] <= max_unstructured_length:
                     if idr_list[window_i[2]][1] >= min_structured_length:
                         pattern = True
-                        idr_start = np.sum([x[1] for x in idr_list[0:i+1]])+1
-                        idr_end = idr_start + idr_list[i+1][1] - 1
+                        idr_start = np.sum([x[1] for x in idr_list[0: i + 1]]) + 1
+                        idr_end = idr_start + idr_list[i + 1][1] - 1
                         pos_list.append([idr_start, idr_end])
         i += 1
 
@@ -1256,21 +1254,21 @@ def annotate_proteins_with_idr_pattern(
         protein_accession = df_prot.protein_id.values[0]
 
         idr_list = [[k, len(list(g))] for k, g in groupby(df_prot.IDR.values)]
-        pattern = find_idr_pattern(idr_list,
+        pattern, pos_list = find_idr_pattern(idr_list,
                                    min_structured_length=min_structured_length,
                                    max_unstructured_length=max_unstructured_length)
 
         pattern_position_list = list()
-        if pattern[0]:
+        if pattern:
             proteins.append(protein_accession)
-            loop_pattern.append(pattern[0])
-            pattern_position.append(pattern[1])
+            loop_pattern.append(pattern)
+            pattern_position.append(pos_list)
 
-            pattern_position_list = pattern_position_list + [list(np.arange(p[0], p[1] + 1)) for p in pattern[1]]
+            pattern_position_list = pattern_position_list + [list(np.arange(p[0], p[1] + 1)) for p in pos_list]
             pattern_position_list = [item for sublist in pattern_position_list for item in sublist]
 
-            df_sorted.loc[(df_sorted.protein_number == protein_i) &
-                      (df_sorted.position.isin(pattern_position_list)), 'flexible_pattern'] = 1
+            selected_locations = start + np.flatnonzero(df_prot.position.isin(pattern_position_list))
+            df_sorted.loc[selected_locations, 'flexible_pattern'] = 1
 
     return df_sorted
 
