@@ -1060,14 +1060,20 @@ def perform_enrichment_analysis(df: pd.DataFrame,
     enrichment = []
 
     for q_cut in quality_cutoffs:
+        # Is quality_cutoffs expected to be a big list?
+        # If so, we can still optimize the function below reasonably I think...
         seq_ann_qcut = df[df.quality >= q_cut]
         for ptm in ptm_types:
             seq_ann_qcut_aa = seq_ann_qcut[seq_ann_qcut.AA.isin(ptm_site_dict[ptm])]
             for roi in rois:
-                n_ptm_in_roi = seq_ann_qcut_aa[(seq_ann_qcut_aa[roi] == 1) & (seq_ann_qcut_aa[ptm] == 1)].shape[0]
-                n_ptm_not_in_roi = seq_ann_qcut_aa[(seq_ann_qcut_aa[roi] == 0) & (seq_ann_qcut_aa[ptm] == 1)].shape[0]
-                n_naked_in_roi = seq_ann_qcut_aa[(seq_ann_qcut_aa[roi] == 1) & (seq_ann_qcut_aa[ptm] == 0)].shape[0]
-                n_naked_not_in_roi = seq_ann_qcut_aa[(seq_ann_qcut_aa[roi] == 0) & (seq_ann_qcut_aa[ptm] == 0)].shape[0]
+                seq_ann_qcut_aa_roi1 = seq_ann_qcut_aa[roi] == 1
+                seq_ann_qcut_aa_roi0 = seq_ann_qcut_aa[roi] == 0
+                seq_ann_qcut_aa_ptm1 = seq_ann_qcut_aa[ptm] == 1
+                seq_ann_qcut_aa_ptm0 = seq_ann_qcut_aa[ptm] == 0
+                n_ptm_in_roi = seq_ann_qcut_aa[seq_ann_qcut_aa_roi1 & seq_ann_qcut_aa_ptm1].shape[0]
+                n_ptm_not_in_roi = seq_ann_qcut_aa[seq_ann_qcut_aa_roi0 & seq_ann_qcut_aa_ptm1].shape[0]
+                n_naked_in_roi = seq_ann_qcut_aa[seq_ann_qcut_aa_roi1 & seq_ann_qcut_aa_ptm0].shape[0]
+                n_naked_not_in_roi = seq_ann_qcut_aa[seq_ann_qcut_aa_roi0 & seq_ann_qcut_aa_ptm0].shape[0]
 
                 fisher_table = np.array([[n_ptm_in_roi, n_naked_in_roi], [n_ptm_not_in_roi, n_naked_not_in_roi]])
                 oddsr, p = scipy.stats.fisher_exact(fisher_table, alternative='two-sided')
@@ -1075,8 +1081,8 @@ def perform_enrichment_analysis(df: pd.DataFrame,
                 res = pd.DataFrame({'quality_cutoff': [q_cut],
                                    'ptm': [ptm],
                                    'roi': [roi],
-                                   'n_aa_ptm':  seq_ann_qcut_aa[seq_ann_qcut_aa[ptm] == 1].shape[0],
-                                   'n_aa_roi':  seq_ann_qcut_aa[seq_ann_qcut_aa[roi] == 1].shape[0],
+                                   'n_aa_ptm':  np.sum(seq_ann_qcut_aa_ptm1),
+                                   'n_aa_roi':  np.sum(seq_ann_qcut_aa_roi1),
                                    'n_ptm_in_roi': n_ptm_in_roi,
                                    'n_ptm_not_in_roi': n_ptm_not_in_roi,
                                    'n_naked_in_roi': n_naked_in_roi,
