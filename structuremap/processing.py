@@ -44,6 +44,9 @@ def download_alphafold_cif(
     timeout : int
         Time to wait for reconnection of downloads.
         Default is 60.
+    verbose_log: bool
+        Whether to write verbose logging information.
+        Default is False.
 
     Returns
     -------
@@ -68,7 +71,7 @@ def download_alphafold_cif(
                 valid_proteins.append(protein)
             except urllib.error.HTTPError:
                 if verbose_log:
-                    logging.info(f"Protein {protein} not available for download.")
+                    logging.info(f"Protein {protein} not available for CIF download.")
                 invalid_proteins.append(protein)
     logging.info(f"Valid proteins: {len(valid_proteins)}")
     logging.info(f"Invalid proteins: {len(invalid_proteins)}")
@@ -81,6 +84,8 @@ def download_alphafold_pae(
     out_folder: str,
     out_format: str = "pae_{}.hdf",
     alphafold_pae_url: str = 'https://alphafold.ebi.ac.uk/files/AF-{}-F1-predicted_aligned_error_v1.json',
+    timeout: int = 60,
+    verbose_log: bool = False,
 ):
     """
     Function to download paired aligned errors (pae) for protein structures predicted by AlphaFold.
@@ -99,12 +104,19 @@ def download_alphafold_pae(
         The base link from where to download pae files.
         The brackets {} are replaced by a protein name from the proteins list.
         Default is 'https://alphafold.ebi.ac.uk/files/AF-{}-F1-predicted_aligned_error_v1.json'.
+    timeout : int
+        Time to wait for reconnection of downloads.
+        Default is 60.
+    verbose_log: bool
+        Whether to write verbose logging information.
+        Default is False.
 
     Returns
     -------
     : (list, list, list)
         The valid, invalid and existing proteins.
     """
+    socket.setdefaulttimeout(timeout)
     valid_proteins = []
     invalid_proteins = []
     existing_proteins = []
@@ -120,11 +132,7 @@ def download_alphafold_pae(
                 name_in = alphafold_pae_url.format(protein)
                 with urllib.request.urlopen(name_in) as url:
                     data = json.loads(url.read().decode())
-                # res1=np.array(data[0]['residue1'], dtype=np.uint16) # change to uint32 in case larger proteins come up in alphafold
-                # res2=np.array(data[0]['residue2'], dtype=np.uint16)
                 dist = np.array(data[0]['distance'])
-
-                # data_list = [('res1',res1),('res2',res2),('dist',dist)]
                 data_list = [('dist', dist)]
                 with h5py.File(name_out, 'w') as hdf_root:
                     for key, data in data_list:
@@ -135,14 +143,14 @@ def download_alphafold_pae(
                                             shuffle=True,
                                         )
                 valid_proteins.append(protein)
-            except:
-                # Declare which exceptions are possible and why this leads to invalid proteins.
-                # Now there e.g. HDF IO errors included as well, which should probably be handled differently.
+            except urllib.error.HTTPError:
+                if verbose_log:
+                    logging.info(f"Protein {protein} not available for PAE download.")
+                # @ Include HDF IO errors as well, which should probably be handled differently.
                 invalid_proteins.append(protein)
-    print(f"Valid proteins: {len(valid_proteins)}")
-    print(f"Invalid proteins: {len(invalid_proteins)}")
-    print(f"Existing proteins: {len(existing_proteins)}")
-    # Logging module?
+    logging.info(f"Valid proteins: {len(valid_proteins)}")
+    logging.info(f"Invalid proteins: {len(invalid_proteins)}")
+    logging.info(f"Existing proteins: {len(existing_proteins)}")
     return(valid_proteins, invalid_proteins, existing_proteins)
 
 
