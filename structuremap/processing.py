@@ -891,7 +891,7 @@ def get_proximity_pvals(df: pd.DataFrame,
                         per_site_metric: str = 'mean',
                         error_operation: str = 'minus',
                         n_random: int = 10000,
-                        random_seed: int = 44
+                        random_seed: int = 44  # should obviously be 42;) Might mess up your testing though
                         ) -> pd.DataFrame:
     """
     Get proximity p-values for selected PTMs.
@@ -904,7 +904,7 @@ def get_proximity_pvals(df: pd.DataFrame,
         Array of PTM modifications for which to perform the proximity analysis.
     ptm_site_dict : dict
         Dictionary containing the possible amino acid sites for each PTM.
-    error_dir: : str
+    error_dir : str
         Path to the directory where the hdf files containing the matrices of
         paired aligned errors of AlphaFold are stored.
     per_site_metric : str
@@ -915,6 +915,7 @@ def get_proximity_pvals(df: pd.DataFrame,
         'minus' or 'plus' can be chosen. Default is 'minus'.
     n_random : int
         Number of random permutations to perform. Default is 10'000.
+        TODO: give recommendations to de/increase and the effect on quality/speed?
     random_seed : int
         Random seed for the analysis. Default is 44.
 
@@ -952,14 +953,14 @@ def get_proximity_pvals(df: pd.DataFrame,
 
             if ((n_aa_mod >= 2) & (n_aa_mod < n_aa_all)):
 
-                with h5py.File(r''+error_dir+'/pae_'+protein_accession+'.hdf','r') as hdf_root:
+                with h5py.File(r'' + error_dir + '/pae_' + protein_accession + '.hdf', 'r') as hdf_root:
                     error_dist = hdf_root['dist'][...]
                 size = int(np.sqrt(len(error_dist)))
                 error_dist = error_dist.reshape(size, size)
 
                 # subset to ptm possible positions
                 # calculate real distance
-                real_idx = df_ptm_prot.index[df_ptm_prot[ptm_i]==1].tolist()
+                real_idx = df_ptm_prot.index[df_ptm_prot[ptm_i] == 1].tolist()
                 # print(real_idx)
                 avg_dist_3d = get_avg_3d_dist(
                     idx_list=np.array(real_idx),
@@ -977,10 +978,10 @@ def get_proximity_pvals(df: pd.DataFrame,
                     metric=per_site_metric)
 
                 # get background distribution
-                rand_idx_list = [random.sample(range(n_aa_all), len(real_idx)) for i in np.arange(0,n_random)]
+                rand_idx_list = [np.array(random.sample(range(n_aa_all), len(real_idx))) for i in range(n_random)]
                 # print(rand_idx_list)
                 rand_avg_dist_3d = [get_avg_3d_dist(
-                    idx_list=np.array(idx_l),
+                    idx_list=idx_l,
                     coord=np.vstack([
                         df_ptm_prot["x_coord_ca"].values,
                         df_ptm_prot["y_coord_ca"].values,
@@ -990,12 +991,13 @@ def get_proximity_pvals(df: pd.DataFrame,
                     metric=per_site_metric,
                     error_operation=error_operation) for idx_l in rand_idx_list]
                 rand_avg_dist_1d = [get_avg_1d_dist(
-                    idx_list=np.array(idx_l),
+                    idx_list=idx_l,
                     position=df_ptm_prot["position"].values,
                     metric=per_site_metric) for idx_l in rand_idx_list]
                 # get empirical p-values
                 pvalue_3d = np.sum(np.array(rand_avg_dist_3d) <= avg_dist_3d)/n_random
                 pvalue_1d = np.sum(np.array(rand_avg_dist_1d) <= avg_dist_1d)/n_random
+                # If this is a slow step, there are several ways to still optimize this I think. Especially the creation of 10000 elements in both a list and array seem concerning to me. Probably a >> 10 fold is still possible here.
 
             else:
 
@@ -1012,6 +1014,7 @@ def get_proximity_pvals(df: pd.DataFrame,
     res_df = pd.DataFrame({'protein_id': proteins, 'ptm': ptm_type, 'n_ptms': n_ptms, 'pvalue_1d': pvals_1d, 'pvalue_3d': pvals_3d})
 
     res_df_noNan = res_df.dropna(subset=['pvalue_3d','pvalue_1d']).reset_index(drop=True)
+    # Why are these then stored explicitly above?
 
     res_df_noNan['pvalue_1d_adj_bh'] = statsmodels.stats.multitest.multipletests(pvals=res_df_noNan.pvalue_1d, alpha=0.1, method='fdr_bh')[1]
     res_df_noNan['pvalue_3d_adj_bh'] = statsmodels.stats.multitest.multipletests(pvals=res_df_noNan.pvalue_3d, alpha=0.1, method='fdr_bh')[1]
