@@ -568,7 +568,22 @@ def find_end(
             break
     return start_index
 
-def partition_df_by_prots(df):
+def partition_df_by_prots(
+    df: pd.DataFrame,
+) -> pd.DataFrame:
+    """
+    Generator function to split a dataframe into seperate proteins.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        pd.DataFrame of formatted AlphaFold data across various proteins.
+
+    Yields
+    -------
+    : pd.DataFrame
+        Subset of the input dataframe only containing a single protein.
+    """
     if not df.protein_number.is_monotonic_increasing:
         df = df.sort_values(by='protein_number').reset_index(drop=True)
     unique_proteins = df.protein_number.unique()
@@ -610,16 +625,12 @@ def annotate_accessibility(
         Dataframe repporting the number of neighboring amino acids at the specified
         maximum distance and angle per protein, amino acid and position.
     """
-
     proteins = list()
     AA = list()
     AA_p = list()
     a_AA = list()
-
     for df_prot in partition_df_by_prots(df):
-
         protein_accession = df_prot.protein_id.values[0]
-
         if error_dir is not None:
             with h5py.File(r''+error_dir+'/pae_'+protein_accession+'.hdf', 'r') as hdf_root:
                 # Always use os.path.join. Windows and linux / are not necessarily the same!
@@ -632,9 +643,7 @@ def annotate_accessibility(
         else:
             error_dist = np.zeros((df_prot.shape[0], df_prot.shape[0]))
             use_pae = 'nopae'
-
         idx_list = np.arange(0, df_prot.shape[0])
-
         res_a = get_neighbors(
             idx_list=idx_list,
             coord_a=np.vstack([df_prot.x_coord_ca.values,
@@ -649,8 +658,9 @@ def annotate_accessibility(
             coord_n=np.vstack([df_prot.x_coord_n.values,
                               df_prot.y_coord_n.values,
                               df_prot.z_coord_n.values]).T,
-          # If this step is slow, consider avoiding the vstack to create new arrays
-          # Alternatively, it might be faster to use e.g. df[["x", "y", "z"]].values as pandas might force this into a view rather than a new array
+            # If this step is slow, consider avoiding the vstack to create new arrays
+            # Alternatively, it might be faster to use e.g. df[["x", "y", "z"]].values
+            # as pandas might force this into a view rather than a new array
             position=df_prot.position.values.astype(np.int64),  # should this cast not be enforced on the base df already?
             error_dist=error_dist,
             max_dist=max_dist,
