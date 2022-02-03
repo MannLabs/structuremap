@@ -176,6 +176,9 @@ def format_alphafold_data(directory: str,
             protein_id = re.sub(r'.cif', '', file)
 
             if protein_id in protein_ids:
+                # What if protein_id not in protein_ids?
+                # Raise error or at least print a warning message?
+                # Also possible to provide an "empty" protein_ids list which automatically takes all proteins in the folder?
 
                 protein_number += 1
 
@@ -208,15 +211,7 @@ def format_alphafold_data(directory: str,
                                         "('y_coord', 'N')": "y_coord_n",
                                         "('z_coord', 'N')": "z_coord_n"})
 
-                df[['position', 'quality',
-                    'x_coord_ca', 'y_coord_ca', 'z_coord_ca',
-                    'x_coord_cb', 'y_coord_cb', 'z_coord_cb',
-                    'x_coord_c', 'y_coord_c', 'z_coord_c',
-                    'x_coord_n', 'y_coord_n', 'z_coord_n']] = df[['position', 'quality',
-                                                                  'x_coord_ca', 'y_coord_ca', 'z_coord_ca',
-                                                                  'x_coord_cb', 'y_coord_cb', 'z_coord_cb',
-                                                                  'x_coord_c', 'y_coord_c', 'z_coord_c',
-                                                                  'x_coord_n', 'y_coord_n', 'z_coord_n']].apply(pd.to_numeric)
+                df = df.apply(pd.to_numeric, errors='ignore')
 
                 df['secondary_structure'] = 'unstructured'
 
@@ -232,6 +227,8 @@ def format_alphafold_data(directory: str,
 
     alphafold_annotation = pd.concat(alphafold_annotation_l)
     alphafold_annotation = alphafold_annotation.sort_values(by=['protein_number', 'protein_id', 'position']).reset_index(drop=True)
+    # Isn't the sorting by protein_number and protein_id redundant? 
+    # Probably faster if you skip the protein_id
 
     alphafold_annotation['structure_group'] = [re.sub('_.*', '', i) for i in alphafold_annotation['secondary_structure']]
     # structure_types = list(alphafold_annotation.structure_group.unique())
