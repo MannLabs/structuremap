@@ -1294,6 +1294,7 @@ def extend_flexible_pattern(
     : np.ndarray
         Array with the extended pattern.
     """
+    # Purely by documentation, I still have no idea what this function does.
     extended_pattern = []
     for i in range(len(pattern)):
         low_window_bound = i - window
@@ -1332,6 +1333,7 @@ def get_extended_flexible_pattern(
         Input dataframe with additional columns containing the extended patterns.
     """
     df_sorted = df.sort_values(by=['protein_number', 'position']).reset_index(drop=True)
+    # You this very frequently. Probably it is best to do it just once and require the input df to be sorted.
     unique_proteins = df_sorted.protein_number.unique()
     end = 0
 
@@ -1343,6 +1345,7 @@ def get_extended_flexible_pattern(
         end = find_end(protein_i, end, df_sorted.protein_number.values)
 
         df_prot = df_sorted[start:end].reset_index(drop=True)
+        # You often repeat this pattern to select a prot_df. Perhaps put in a single function/generator and recycle everywhere?
 
         for pattern in patterns:
             for w in windows:
