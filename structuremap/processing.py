@@ -8,6 +8,7 @@ import re
 from itertools import groupby
 import urllib.request
 import random
+import logging
 
 # external
 import numba
@@ -19,10 +20,10 @@ import statsmodels.stats.multitest
 import Bio.PDB.MMCIF2Dict
 import scipy.stats
 
-
 def download_alphafold_cif(
     proteins: list,
     out_folder: str,
+    out_format: str = "{}.cif",
     alphafold_cif_url: str = 'https://alphafold.ebi.ac.uk/files/AF-{}-F1-model_v1.cif',
     timeout: int = 60,
 ) -> tuple:
@@ -46,7 +47,7 @@ def download_alphafold_cif(
     Returns
     -------
     : (list, list, list)
-        The of valid, invalid and existing proteins.
+        The number of valid, invalid and existing proteins.
     """
     socket.setdefaulttimeout(timeout)
     valid_proteins = []
@@ -56,7 +57,7 @@ def download_alphafold_cif(
         name_in = alphafold_cif_url.format(protein)
         name_out = os.path.join(
             out_folder,
-            f"{protein}.cif"
+            out_format.format(protein)
         )
         if os.path.isfile(name_out):
             existing_proteins.append(protein)
@@ -69,11 +70,9 @@ def download_alphafold_cif(
                 # If protein does not exist, if download was timed-out?
                 # Regardless, this certainly should not be a bare except!!!
                 invalid_proteins.append(protein)
-    print(f"Valid proteins: {len(valid_proteins)}")
-    print(f"Invalid proteins: {len(invalid_proteins)}")
-    print(f"Existing proteins: {len(existing_proteins)}")
-    # I would advise to use the logging module,
-    # but this requires to modify the code in numerous places.
+    logging.info(f"Valid proteins: {len(valid_proteins)}")
+    logging.info(f"Invalid proteins: {len(invalid_proteins)}")
+    logging.info(f"Existing proteins: {len(existing_proteins)}")
     return(valid_proteins, invalid_proteins, existing_proteins)
 
 
