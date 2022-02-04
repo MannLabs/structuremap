@@ -251,9 +251,10 @@ def format_alphafold_data(
         by=['protein_number', 'position']).reset_index(drop=True)
 
     alphafold_annotation['structure_group'] = [re.sub('_.*', '', i) for i in alphafold_annotation['secondary_structure']]
-
-    str_oh = pd.get_dummies(alphafold_annotation['structure_group'], dtype='int64')
+    str_oh = pd.get_dummies(alphafold_annotation['structure_group'],
+                            dtype='int64')
     alphafold_annotation = alphafold_annotation.join(str_oh)
+
     return(alphafold_annotation)
 
 
@@ -584,6 +585,7 @@ def partition_df_by_prots(
     : pd.DataFrame
         Subset of the input dataframe only containing a single protein.
     """
+    df = df.astype({'position': 'int64'})
     if not df.protein_number.is_monotonic_increasing:
         df = df.sort_values(by='protein_number').reset_index(drop=True)
     unique_proteins = df.protein_number.unique()
@@ -666,34 +668,25 @@ def annotate_accessibility(
             # If this step is slow, consider avoiding the vstack to create new arrays
             # Alternatively, it might be faster to use e.g. df[["x", "y", "z"]].values
             # as pandas might force this into a view rather than a new array
-            position=df_prot.position.values.astype(np.int64),  # should this cast not be enforced on the base df already?
+            position=df_prot.position.values,
             error_dist=error_dist,
             max_dist=max_dist,
             max_angle=max_angle)
-
         proteins.append(df_prot.protein_id.values)
         # using numeracal prot_numbers might be better.
-        # In general it is good practive to reduce strings/objects in arrays/dfs as much possible. Especially try to avoid repetetion of such types and just use indices and a reference array. Rarely do you need this actual values anyways.
+        # In general it is good practice to reduce strings/objects in arrays/dfs
+        # as much possible. Especially try to avoid repetetion of such types and
+        # just use indices and a reference array. Rarely do you need this actual
+        # values anyways.
         AA.append(df_prot.AA.values)
         AA_p.append(df_prot.position.values)
         a_AA.append(res_a)
-
     proteins = np.concatenate(proteins)
     AA = np.concatenate(AA)
     AA_p = np.concatenate(AA_p)
-
     a_AA = np.concatenate(a_AA)
-
     accessibility_df = pd.DataFrame({'protein_id': proteins, 'AA': AA, 'position': AA_p})
-    accessibility_df['nAA_' + str(max_dist) + '_' + str(max_angle) + '_' + use_pae] = a_AA
-    # f_string? Again, consider using indices instead
-
-    # glycine_vol = 60.1
-    # spherical_sector_volume = ((2*(np.pi)*(max_dist**3))/3)*(1-np.cos(np.deg2rad(max_angle)))
-    # n_max_AA = spherical_sector_volume/glycine_vol
-
-    # accessibility_df['nAA_'+str(max_dist)+'_'+str(max_angle)+'_'+use_pae+'_rel'] = a_AA/n_max_AA
-
+    accessibility_df[f'nAA_{max_dist}_{max_angle}_use_pae'] = a_AA
     return(accessibility_df)
 
 
