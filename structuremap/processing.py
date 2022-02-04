@@ -1193,10 +1193,12 @@ def annotate_proteins_with_idr_pattern(
         Input dataframe with an additional column 'flexible_pattern'.
     """
 
+    res_out = list()
     proteins = list()
     loop_pattern = list()
     pattern_position = list()
     for df_prot in partition_df_by_prots(df):
+        df_prot['flexible_pattern'] = 0
         protein_accession = df_prot.protein_id.values[0]
         idr_list = [[k, len(list(g))] for k, g in groupby(df_prot.IDR.values)]
         pattern, pos_list = find_idr_pattern(idr_list,
@@ -1211,9 +1213,11 @@ def annotate_proteins_with_idr_pattern(
             pattern_position_list = pattern_position_list + [list(np.arange(p[0], p[1] + 1)) for p in pos_list]
             pattern_position_list = [item for sublist in pattern_position_list for item in sublist]
 
-            selected_locations = start + np.flatnonzero(df_prot.position.isin(pattern_position_list))
-            df_sorted.loc[selected_locations, 'flexible_pattern'] = 1
-    return df_sorted
+            selected_locations = np.flatnonzero(df_prot.position.isin(pattern_position_list))
+            df_prot.loc[selected_locations, 'flexible_pattern'] = 1
+        res_out.append(df_prot)
+    res_out = pd.concat(res_out)
+    return res_out
 
 
 @numba.njit
