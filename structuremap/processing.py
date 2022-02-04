@@ -57,6 +57,8 @@ def download_alphafold_cif(
     valid_proteins = []
     invalid_proteins = []
     existing_proteins = []
+    if not os.path.exists(out_folder):
+        os.makedirs(out_folder)
     for protein in tqdm.tqdm(proteins):
         name_in = alphafold_cif_url.format(protein)
         name_out = os.path.join(
@@ -120,6 +122,8 @@ def download_alphafold_pae(
     valid_proteins = []
     invalid_proteins = []
     existing_proteins = []
+    if not os.path.exists(out_folder):
+        os.makedirs(out_folder)
     for protein in tqdm.tqdm(proteins):
         name_out = os.path.join(
             out_folder,
