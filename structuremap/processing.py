@@ -879,7 +879,6 @@ def get_avg_1d_dist(idx_list: np.ndarray,
             if x1 != x2:
                 all_dist.append(abs(position[x1] - position[x2]))
         all_dist_d = np.array(all_dist)
-
         if metric == 'mean':
             m_d = np.mean(all_dist_d)
         elif metric == 'min':
@@ -894,6 +893,7 @@ def get_proximity_pvals(df: pd.DataFrame,
                         ptm_types: np.ndarray,
                         ptm_site_dict: dict,
                         error_dir: str,
+                        filename_format: str = "pae_{}.hdf",
                         per_site_metric: str = 'mean',
                         error_operation: str = 'minus',
                         n_random: int = 10000,
@@ -913,6 +913,10 @@ def get_proximity_pvals(df: pd.DataFrame,
     error_dir : str
         Path to the directory where the hdf files containing the matrices of
         paired aligned errors of AlphaFold are stored.
+    filename_format : str
+        The file name of the pae files saved by download_alphafold_pae.
+        The brackets {} are replaced by a protein name from the proteins list.
+        Default is 'pae_{}.hdf'.
     per_site_metric : str
         Metric to aggregate distances across all pairs for a given amino acid.
         'mean' or 'min' can be chosen. Default is 'mean'.
@@ -931,43 +935,28 @@ def get_proximity_pvals(df: pd.DataFrame,
         Dataframe reporting 3D and 1D proximity p-values for each protein and selected PTM.
     """
     random.seed(random_seed)
-
-    df_sorted = df.sort_values(by=['protein_number', 'position']).reset_index(drop=True)
-    unique_proteins = df_sorted.protein_number.unique()
-    end = 0
-
     proteins = list()
     ptm_type = list()
     n_ptms = list()
     pvals_3d = list()
     pvals_1d = list()
-
-    for protein_i in tqdm.tqdm(unique_proteins):
-
-        start = end
-        end = find_end(protein_i, end, df_sorted.protein_number.values)
-
-        df_prot = df_sorted[start:end].reset_index(drop=True)
+    for df_prot in partition_df_by_prots(df):
         protein_accession = df_prot.protein_id.values[0]
-
         for ptm_i in ptm_types:
             acc_aa = ptm_site_dict[ptm_i]
             df_ptm_prot = df_prot[df_prot.AA.isin(acc_aa)].reset_index(drop=True)
-
             n_aa_mod = np.sum(df_ptm_prot[ptm_i])
             n_aa_all = df_ptm_prot.shape[0]
-
             if ((n_aa_mod >= 2) & (n_aa_mod < n_aa_all)):
-
-                with h5py.File(r'' + error_dir + '/pae_' + protein_accession + '.hdf', 'r') as hdf_root:
+                with h5py.File(os.path.join(
+                    error_dir,
+                    filename_format.format(protein_accession))) as hdf_root:
                     error_dist = hdf_root['dist'][...]
                 size = int(np.sqrt(len(error_dist)))
                 error_dist = error_dist.reshape(size, size)
-
                 # subset to ptm possible positions
                 # calculate real distance
                 real_idx = df_ptm_prot.index[df_ptm_prot[ptm_i] == 1].tolist()
-                # print(real_idx)
                 avg_dist_3d = get_avg_3d_dist(
                     idx_list=np.array(real_idx),
                     coord=np.vstack([
@@ -982,10 +971,8 @@ def get_proximity_pvals(df: pd.DataFrame,
                     idx_list=np.array(real_idx),
                     position=df_ptm_prot["position"].values,
                     metric=per_site_metric)
-
                 # get background distribution
                 rand_idx_list = [np.array(random.sample(range(n_aa_all), len(real_idx))) for i in range(n_random)]
-                # print(rand_idx_list)
                 rand_avg_dist_3d = [get_avg_3d_dist(
                     idx_list=idx_l,
                     coord=np.vstack([
@@ -1003,30 +990,22 @@ def get_proximity_pvals(df: pd.DataFrame,
                 # get empirical p-values
                 pvalue_3d = np.sum(np.array(rand_avg_dist_3d) <= avg_dist_3d)/n_random
                 pvalue_1d = np.sum(np.array(rand_avg_dist_1d) <= avg_dist_1d)/n_random
-                # If this is a slow step, there are several ways to still optimize this I think. Especially the creation of 10000 elements in both a list and array seem concerning to me. Probably a >> 10 fold is still possible here.
-
+                # If this is a slow step, there are several ways to still optimize this I think.
+                # Especially the creation of 10000 elements in both a list and array seem concerning to me.
+                # Probably a >> 10 fold is still possible here.
             else:
-
                 pvalue_3d = np.nan
                 pvalue_1d = np.nan
-
             pvals_3d.append(pvalue_3d)
             pvals_1d.append(pvalue_1d)
             n_ptms.append(n_aa_mod)
             proteins.append(protein_accession)
             ptm_type.append(ptm_i)
-
-
     res_df = pd.DataFrame({'protein_id': proteins, 'ptm': ptm_type, 'n_ptms': n_ptms, 'pvalue_1d': pvals_1d, 'pvalue_3d': pvals_3d})
-
     res_df_noNan = res_df.dropna(subset=['pvalue_3d','pvalue_1d']).reset_index(drop=True)
-    # Why are these then stored explicitly above?
-
+    # Why are these then stored explicitly above? # This was to know which IDs these are.
     res_df_noNan['pvalue_1d_adj_bh'] = statsmodels.stats.multitest.multipletests(pvals=res_df_noNan.pvalue_1d, alpha=0.1, method='fdr_bh')[1]
     res_df_noNan['pvalue_3d_adj_bh'] = statsmodels.stats.multitest.multipletests(pvals=res_df_noNan.pvalue_3d, alpha=0.1, method='fdr_bh')[1]
-    # res_df_noNan['pvalue_1d_adj_bf'] = statsmodels.stats.multitest.multipletests(pvals=res_df_noNan.pvalue_1d, alpha=0.1, method='bonferroni')[1]
-    # res_df_noNan['pvalue_3d_adj_bf'] = statsmodels.stats.multitest.multipletests(pvals=res_df_noNan.pvalue_3d, alpha=0.1, method='bonferroni')[1]
-
     return(res_df_noNan)
 
 
