@@ -253,7 +253,7 @@ class TestProcessing(unittest.TestCase):
 
         coordinate_array = np.vstack([x,y,z]).T
 
-        np.testing.assert_equal(6.953624, np.round(get_avg_3d_dist(np.array([0,4]), coordinate_array, pos, error), decimals=6))
+        np.testing.assert_equal(6.976812, np.round(get_avg_3d_dist(np.array([0,4]), coordinate_array, pos, error), decimals=6))
         np.testing.assert_equal(3.5, np.round(get_avg_3d_dist(np.array([0,2]), coordinate_array, pos, error), decimals=6))
 
         np.testing.assert_equal(5.586336, np.round(get_avg_3d_dist(np.array([0,3,4]), coordinate_array, pos, error), decimals=6))

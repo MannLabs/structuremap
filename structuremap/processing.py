@@ -872,7 +872,6 @@ def get_avg_1d_dist(idx_list: np.ndarray,
 
     if metric not in ['mean', 'min']:
         raise ValueError('Select mean or min as metric.')
-
     metric_dist = []
     for x1 in idx_list:
         all_dist = []
@@ -885,9 +884,7 @@ def get_avg_1d_dist(idx_list: np.ndarray,
             m_d = np.mean(all_dist_d)
         elif metric == 'min':
             m_d = np.min(all_dist_d)
-
         metric_dist.append(m_d)
-
     metric_dist = np.array(metric_dist)
     avg_min_dist = np.mean(metric_dist)
     return(avg_min_dist)
