@@ -1280,27 +1280,13 @@ def get_extended_flexible_pattern(
     : pd.DataFrame
         Input dataframe with additional columns containing the extended patterns.
     """
-    df_sorted = df.sort_values(by=['protein_number', 'position']).reset_index(drop=True)
-    # You this very frequently. Probably it is best to do it just once and require the input df to be sorted.
-    unique_proteins = df_sorted.protein_number.unique()
-    end = 0
-
     df_out = []
-
-    for protein_i in tqdm.tqdm(unique_proteins):
-
-        start = end
-        end = find_end(protein_i, end, df_sorted.protein_number.values)
-
-        df_prot = df_sorted[start:end].reset_index(drop=True)
-        # You often repeat this pattern to select a prot_df. Perhaps put in a single function/generator and recycle everywhere?
-
+    for df_prot in partition_df_by_prots(df):
         for pattern in patterns:
             for w in windows:
-                df_prot[pattern + '_extended_' + str(w)] = extend_flexible_pattern(
+                df_prot[f'{pattern}_extended_{w}'] = extend_flexible_pattern(
                     pattern=df_prot[pattern].values,
                     window=w)
-
         df_out.append(df_prot)
     df_out = pd.concat(df_out)
     return df_out
