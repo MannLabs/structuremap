@@ -925,7 +925,9 @@ def get_proximity_pvals(df: pd.DataFrame,
         'minus' or 'plus' can be chosen. Default is 'minus'.
     n_random : int
         Number of random permutations to perform. Default is 10'000.
-        TODO: give recommendations to de/increase and the effect on quality/speed?
+        The higher the number of permutations, the more confidence the analysis
+        can achieve. However, a very high number of permutations increases
+        processing time. No fewer than 1'000 permutations should be used.
     random_seed : int
         Random seed for the analysis. Default is 44.
 
@@ -1043,7 +1045,6 @@ def perform_enrichment_analysis(df: pd.DataFrame,
     """
 
     enrichment = []
-
     for q_cut in quality_cutoffs:
         # Is quality_cutoffs expected to be a big list?
         # If so, we can still optimize the function below reasonably I think...
@@ -1059,10 +1060,8 @@ def perform_enrichment_analysis(df: pd.DataFrame,
                 n_ptm_not_in_roi = seq_ann_qcut_aa[seq_ann_qcut_aa_roi0 & seq_ann_qcut_aa_ptm1].shape[0]
                 n_naked_in_roi = seq_ann_qcut_aa[seq_ann_qcut_aa_roi1 & seq_ann_qcut_aa_ptm0].shape[0]
                 n_naked_not_in_roi = seq_ann_qcut_aa[seq_ann_qcut_aa_roi0 & seq_ann_qcut_aa_ptm0].shape[0]
-
                 fisher_table = np.array([[n_ptm_in_roi, n_naked_in_roi], [n_ptm_not_in_roi, n_naked_not_in_roi]])
                 oddsr, p = scipy.stats.fisher_exact(fisher_table, alternative='two-sided')
-
                 res = pd.DataFrame({'quality_cutoff': [q_cut],
                                    'ptm': [ptm],
                                    'roi': [roi],
@@ -1074,15 +1073,11 @@ def perform_enrichment_analysis(df: pd.DataFrame,
                                    'n_naked_not_in_roi': n_naked_not_in_roi,
                                    'oddsr': [oddsr],
                                    'p': [p]})
-
                 enrichment.append(res)
-
     enrichment_df = pd.concat(enrichment)
-
     if multiple_testing:
         enrichment_df['p_adj_bf'] = statsmodels.stats.multitest.multipletests(pvals=enrichment_df.p, alpha=0.01, method='bonferroni')[1]
         enrichment_df['p_adj_bh'] = statsmodels.stats.multitest.multipletests(pvals=enrichment_df.p, alpha=0.01, method='fdr_bh')[1]
-
     return(enrichment_df)
 
 
