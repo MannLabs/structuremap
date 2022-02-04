@@ -804,10 +804,8 @@ def get_avg_3d_dist(idx_list: np.ndarray,  # as before, technically not a list b
 
     if metric not in ['mean', 'min']:
         raise ValueError('Select mean or min as metric.')
-
     if error_operation not in ['minus', 'plus']:
         raise ValueError('Select minus or plus as error_operation.')
-
     metric_dist = []
     for x1 in idx_list:
         all_dist = []
@@ -818,16 +816,14 @@ def get_avg_3d_dist(idx_list: np.ndarray,  # as before, technically not a list b
                     coordinate_array_2=coord,
                     idx_1=x1,
                     idx_2=x2)
-
                 error_i = get_paired_error(
                     position=position,
                     error_dist=error_dist,
                     idx_1=x1,
                     idx_2=x2)
-
                 if error_operation == 'minus':
                     dist_error_i = dist_i - error_i
-                    if dist_error_i < 0:  # Should this not be: if dist_error_i < average_aa_size:
+                    if dist_error_i < average_aa_size:
                         dist_error_i = average_aa_size
                     all_dist.append(dist_error_i)
                 elif error_operation == 'plus':
@@ -838,17 +834,13 @@ def get_avg_3d_dist(idx_list: np.ndarray,  # as before, technically not a list b
                         all_dist.append(nAA_dist)
                     else:
                         all_dist.append(dist_error_i)
-
         # Probably the 5 lines below can be optimized, but likely not worth the speed improvement?
         all_dist_d = np.array(all_dist)
-
         if metric == 'mean':
             m_d = np.mean(all_dist_d)
         elif metric == 'min':
             m_d = np.min(all_dist_d)
-
         metric_dist.append(m_d)
-
     metric_dist = np.array(metric_dist)
     avg_metric_dist = np.mean(metric_dist)
     return(avg_metric_dist)
