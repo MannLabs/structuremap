@@ -600,7 +600,8 @@ def annotate_accessibility(
     df: pd.DataFrame,
     max_dist: float,
     max_angle: float,
-    error_dir: str
+    error_dir: str,
+    filename_format: str = "pae_{}.hdf",
 ) -> pd.DataFrame:
     """
     Half sphere exposure as calculated in https://onlinelibrary.wiley.com/doi/10.1002/prot.20379
@@ -610,14 +611,19 @@ def annotate_accessibility(
     ----------
     df : pd.DataFrame
         pd.DataFrame of formatted AlphaFold data across various proteins.
-        TODO: from which internal function? Note that this is good to mention for other arguments in other functions as well to show how functions are connected
+        Such a dataframe is gerated by format_alphafold_data.
     max_dist : float
         Float specifying the maximum distance between two amino acids.
     max_angle : float
         Float specifying the maximum angle (in degrees) between two amino acids.
     error_dir: : str
         Path to the directory where the hdf files containing the matrices of
-        paired aligned errors of AlphaFold are stored.
+        paired aligned errors of AlphaFold are stored. This should correspond
+        to the out_folder used in download_alphafold_pae.
+    filename_format : str
+        The file name of the pae files saved by download_alphafold_pae.
+        The brackets {} are replaced by a protein name from the proteins list.
+        Default is 'pae_{}.hdf'.
 
     Returns
     -------
@@ -632,10 +638,9 @@ def annotate_accessibility(
     for df_prot in partition_df_by_prots(df):
         protein_accession = df_prot.protein_id.values[0]
         if error_dir is not None:
-            with h5py.File(r''+error_dir+'/pae_'+protein_accession+'.hdf', 'r') as hdf_root:
-                # Always use os.path.join. Windows and linux / are not necessarily the same!
-                # Using + for string concatenation should be considered deprecated.
-                # Use f-strings or "".join functions.
+            with h5py.File(os.path.join(
+                error_dir,
+                filename_format.format(protein_accession))) as hdf_root:
                 error_dist = hdf_root['dist'][...]
             size = int(np.sqrt(len(error_dist)))
             error_dist = error_dist.reshape(size, size)
