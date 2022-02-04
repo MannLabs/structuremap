@@ -256,7 +256,7 @@ class TestProcessing(unittest.TestCase):
         np.testing.assert_equal(6.976812, np.round(get_avg_3d_dist(np.array([0,4]), coordinate_array, pos, error), decimals=6))
         np.testing.assert_equal(3.5, np.round(get_avg_3d_dist(np.array([0,2]), coordinate_array, pos, error), decimals=6))
 
-        np.testing.assert_equal(5.586336, np.round(get_avg_3d_dist(np.array([0,3,4]), coordinate_array, pos, error), decimals=6))
+        np.testing.assert_equal(5.668168, np.round(get_avg_3d_dist(np.array([0,3,4]), coordinate_array, pos, error), decimals=6))
         np.testing.assert_equal(4.503003, np.round(get_avg_3d_dist(np.array([0,3,4]), coordinate_array, pos, error, metric='min'), decimals=6))
 
         np.testing.assert_equal(14, np.round(get_avg_3d_dist(np.array([0,4]), coordinate_array, pos, error, error_operation='plus'), decimals=6))
