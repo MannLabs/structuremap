@@ -1226,7 +1226,8 @@ def extend_flexible_pattern(
     window: int
 ) -> np.ndarray:
     """
-    Extend a pattern by the specified amino acid window
+    This function takes an array of binary values (0 or 1) and extends streches
+    of 1s to either side by the provided window.
 
     Parameters
     ----------
@@ -1239,9 +1240,9 @@ def extend_flexible_pattern(
     Returns
     -------
     : np.ndarray
-        Array with the extended pattern.
+        Array with of binary values, where streches of 1s in the input array
+        were extended to both sides.
     """
-    # Purely by documentation, I still have no idea what this function does.
     extended_pattern = []
     for i in range(len(pattern)):
         low_window_bound = i - window
