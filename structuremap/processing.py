@@ -20,6 +20,7 @@ import statsmodels.stats.multitest
 import Bio.PDB.MMCIF2Dict
 import scipy.stats
 
+
 def download_alphafold_cif(
     proteins: list,
     out_folder: str,
@@ -279,7 +280,7 @@ def get_3d_dist(
     coordinate_array_1 : np.ndarray
         Array of 3D coordinates.
         Must be 3d, e.g. np.float64[:,3]
-    coordinate_array_2 : np.ndarray)
+    coordinate_array_2 : np.ndarray
         Array of 3D coordinates.
         Must be 3d, e.g. np.float64[:,3]
     idx_1 : int
@@ -573,11 +574,14 @@ def find_end(
             break
     return start_index
 
+
 def partition_df_by_prots(
     df: pd.DataFrame,
 ) -> pd.DataFrame:
     """
     Generator function to split a dataframe into seperate proteins.
+
+    NOTE: This function is significantly faster if the input df is already sorted by protein_number!
 
     Parameters
     ----------
@@ -601,6 +605,7 @@ def partition_df_by_prots(
         if not prot_df.position.is_monotonic_increasing:
             prot_df.sort_values(by='position', inplace=True)
         yield prot_df.reset_index(drop=True)
+
 
 def annotate_accessibility(
     df: pd.DataFrame,
@@ -802,7 +807,6 @@ def get_avg_3d_dist(idx_list: np.ndarray,  # as before, technically not a list b
     : float
         Average 3D distance between all selected amino acids.
     """
-
     if metric not in ['mean', 'min']:
         raise ValueError('Select mean or min as metric.')
     if error_operation not in ['minus', 'plus']:
