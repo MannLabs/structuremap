@@ -748,29 +748,17 @@ def get_smooth_score(df: pd.DataFrame,
     : pd.DataFrame
         Copy of the input dataframe with additional columns containing the smoothed scores.
     """
-    df_sorted = df.sort_values(by=['protein_number', 'position']).reset_index(drop=True)
-    unique_proteins = df_sorted.protein_number.unique()
-    end = 0
-
     df_out = []
-
-    for protein_i in tqdm.tqdm(unique_proteins):
-
-        start = end
-        end = find_end(protein_i, end, df_sorted.protein_number.values)
-
-        df_prot = df_sorted[start:end].reset_index(drop=True)
-
+    for df_prot in partition_df_by_prots(df):
         for score in scores:
             for w in half_windows:
                 df_prot[f"{score}_smooth{w}"] = smooth_score(
                     score=df_prot[score].values,
                     half_window=w)
-
         df_out.append(df_prot)
     df_out = pd.concat(df_out)
     return df_out
-
+    
 
 @numba.njit
 def get_avg_3d_dist(idx_list: np.ndarray,  # as before, technically not a list but an array. Rename?
