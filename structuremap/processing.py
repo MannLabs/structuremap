@@ -1156,10 +1156,8 @@ def find_idr_pattern(
     i = 0
     pattern = False
     pos_list = list()
-
     while i < (len(idr_list) - 2):
         window_i = window + i
-
         if idr_list[window_i[0]][0] == 0:
             if idr_list[window_i[0]][1] >= min_structured_length:
                 if idr_list[window_i[1]][1] <= max_unstructured_length:
@@ -1169,7 +1167,6 @@ def find_idr_pattern(
                         idr_end = idr_start + idr_list[i + 1][1] - 1
                         pos_list.append([idr_start, idr_end])
         i += 1
-
     return pattern, pos_list
 
 
@@ -1196,31 +1193,15 @@ def annotate_proteins_with_idr_pattern(
         Input dataframe with an additional column 'flexible_pattern'.
     """
 
-    df_sorted = df.sort_values(by=['protein_number', 'position']).reset_index(drop=True)
-    df_sorted['flexible_pattern'] = 0
-
-    unique_proteins = df_sorted.protein_number.unique()
-
-    end = 0
-
     proteins = list()
     loop_pattern = list()
     pattern_position = list()
-
-    for protein_i in tqdm.tqdm(unique_proteins):
-
-        start = end
-        end = find_end(protein_i, end, df_sorted.protein_number.values)
-
-        df_prot = df_sorted[start:end].reset_index(drop=True)
-
+    for df_prot in partition_df_by_prots(df):
         protein_accession = df_prot.protein_id.values[0]
-
         idr_list = [[k, len(list(g))] for k, g in groupby(df_prot.IDR.values)]
         pattern, pos_list = find_idr_pattern(idr_list,
                                    min_structured_length=min_structured_length,
                                    max_unstructured_length=max_unstructured_length)
-
         pattern_position_list = list()
         if pattern:
             proteins.append(protein_accession)
@@ -1232,7 +1213,6 @@ def annotate_proteins_with_idr_pattern(
 
             selected_locations = start + np.flatnonzero(df_prot.position.isin(pattern_position_list))
             df_sorted.loc[selected_locations, 'flexible_pattern'] = 1
-
     return df_sorted
 
 
