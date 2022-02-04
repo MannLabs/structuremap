@@ -1111,22 +1111,9 @@ def perform_enrichment_analysis_per_protein(df: pd.DataFrame,
         Dataframe reporting p-values for the enrichment of all selected ptm_types
         across selected rois on a per protein basis.
     """
-
-    df_sorted = df.sort_values(by=['protein_number', 'position']).reset_index(drop=True)
-
-    unique_proteins = df_sorted.protein_number.unique()
-
-    end = 0
-
     enrichment_list = list()
-
-    for protein_i in tqdm.tqdm(unique_proteins):
-
-        start = end
-        end = find_end(protein_i, end, df_sorted.protein_number.values)
-        df_prot = df_sorted[start:end].reset_index(drop=True)
+    for df_prot in partition_df_by_prots(df):
         protein_accession = df_prot.protein_id.values[0]
-
         res = perform_enrichment_analysis(df=df_prot,
                                           ptm_types=ptm_types,
                                           rois=rois,
@@ -1134,16 +1121,12 @@ def perform_enrichment_analysis_per_protein(df: pd.DataFrame,
                                           ptm_site_dict=ptm_site_dict,
                                           multiple_testing=False)
         res.insert(loc=0, column='protein_id', value=np.repeat(protein_accession, res.shape[0]))
-
         enrichment_list.append(res)
-
     enrichment_per_protein = pd.concat(enrichment_list)
     enrichment_per_protein = enrichment_per_protein[(enrichment_per_protein.n_aa_ptm >= 2) & (enrichment_per_protein.n_aa_roi >= enrichment_per_protein.n_aa_ptm)]
     enrichment_per_protein.reset_index(drop=True, inplace=True)
-
     enrichment_per_protein['p_adj_bf'] = statsmodels.stats.multitest.multipletests(pvals=enrichment_per_protein.p, alpha=0.01, method='bonferroni')[1]
     enrichment_per_protein['p_adj_bh'] = statsmodels.stats.multitest.multipletests(pvals=enrichment_per_protein.p, alpha=0.01, method='fdr_bh')[1]
-
     return enrichment_per_protein
 
 
