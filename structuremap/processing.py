@@ -686,7 +686,7 @@ def annotate_accessibility(
     AA_p = np.concatenate(AA_p)
     a_AA = np.concatenate(a_AA)
     accessibility_df = pd.DataFrame({'protein_id': proteins, 'AA': AA, 'position': AA_p})
-    accessibility_df[f'nAA_{max_dist}_{max_angle}_use_pae'] = a_AA
+    accessibility_df[f'nAA_{max_dist}_{max_angle}_{use_pae}'] = a_AA
     return(accessibility_df)
 
 
@@ -758,7 +758,7 @@ def get_smooth_score(df: pd.DataFrame,
         df_out.append(df_prot)
     df_out = pd.concat(df_out)
     return df_out
-    
+
 
 @numba.njit
 def get_avg_3d_dist(idx_list: np.ndarray,  # as before, technically not a list but an array. Rename?
