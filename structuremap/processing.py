@@ -1356,7 +1356,7 @@ def get_extended_flexible_pattern(
     return df_out
 
 
-def calculate_distances(
+def calculate_distances_between_ptms(
     background_idx_list: list,
     target_aa_idx: np.ndarray,
     coords: np.ndarray,
@@ -1415,7 +1415,7 @@ def calculate_distances(
     return distance_res, distance_1D_res
 
 
-def get_distance_list(
+def get_ptm_distance_list(
     df: pd.DataFrame,
     ptm_target: str,
     ptm_background: str,
@@ -1426,12 +1426,13 @@ def get_distance_list(
     random_seed: int = 44,
 ) -> [list, list, list]:
     """
-    Extract a list of distances.
+    Extract a lists of 3D and 1D distances between target amino acids and a
+    random background.
 
     Parameters
     ----------
     df : pd.DataFrame
-
+        Dataframe with AlphaFold annotations.
     ptm_target : str
         String specifying the PTM type for which you want to evaluate if it
         is in colocalizing with the background.
@@ -1501,7 +1502,7 @@ def get_distance_list(
             target_mod_idx = df_prot.index[df_prot[ptm_target] == 1].tolist()
             # index of observed PTMs within index list of all target_aa
             target_aa_idx_mod_idx = [i for i in np.arange(len(target_aa_idx)) if target_aa_idx[i] in target_mod_idx]
-            distance_res, distance_1D_res = calculate_distances(
+            distance_res, distance_1D_res = calculate_distances_between_ptms(
                 background_idx_list=np.array(background_idx_list),
                 target_aa_idx=np.array(target_aa_idx),
                 coords=np.vstack([
@@ -1571,7 +1572,9 @@ def evaluate_ptm_colocalization(
     dist_step: float = 5
 ) -> pd.DataFrame:
     """
-    Extract a list of distances.
+    Evaluate for a given target PTM type if modifications preferentially occur
+    closer to the provided background PTM types than expected by chance or at
+    distance bins that are further away.
 
     Parameters
     ----------
@@ -1627,7 +1630,7 @@ def evaluate_ptm_colocalization(
     for ptm_type in ptm_types:
         if ptm_target == 'self':
             ptm_target = ptm_type
-        distances_3D, distances_1D, mod_idx = get_distance_list(
+        distances_3D, distances_1D, mod_idx = get_ptm_distance_list(
             df=df,
             ptm_target=ptm_target,
             ptm_background=ptm_type,
