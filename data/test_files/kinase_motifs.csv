@@ -1,0 +1,325 @@
+enzyme	motif	mod_pos
+Akt kinase substrate motif	[R][A-Z][R][A-Z][A-Z][ST][FL]	5
+Akt kinase substrate motif	[R][A-Z][R][A-Z][A-Z][ST]	5
+Akt kinase substrate motif	[G][R][A][R][T][ST][S][FAE]	6
+Akt kinase substrate motif	[RQK][RKNQPH][RK][RST][NKQHDP][S][FWIMNS][STH][RSK][STPQ]	5
+Akt kinase substrate motif	[RK][A-Z][RK][ST][A-Z][S]	5
+AMP-activated protein kinase substrate motif	[MVLIF][RKH][A-Z][A-Z][A-Z][ST][A-Z][A-Z][A-Z][MVLIF]	5
+AMP-activated protein kinase substrate motif	[MVLI][A-Z][A-Z][RKH][A-Z][ST][A-Z][A-Z][A-Z][MVLI]	5
+AMP-activated protein kinase substrate motif	[MVLIF][RKH][A-Z][A-Z][ST][A-Z][A-Z][A-Z][MVLIF]	4
+AMP-activated protein kinase 2 substrate motif	[RK][A-Z][R][A-Z][A-Z][S][A-Z][A-Z][A-Z][RK]	5
+ATM kinase substrate motif	[PLIM][A-Z][LIDE][S][Q]	3
+ATM kinase substrate motif	[L][S][Q][E]	1
+ATM kinase substrate motif	[S][Q]	0
+Aurora-A kinase substrate motif	[RKN][R][A-Z][ST][MLVI]	3
+b-Adrenergic Receptor kinase substrate motif	[DE][ST][A-Z][A-Z][A-Z]	1
+Branched chain alpha-ketoacid dehydrogenase kinase substrate motif	[H][S][T][S][D][D]	1
+Branched chain alpha-ketoacid dehydrogenase kinase substrate motif	[Y][R][S][V][D][E]	2
+Calmodulin-dependent protein kinase I substrate motif	[MVLIF][A-Z][R][A-Z][A-Z][ST][A-Z][A-Z][A-Z][MVLIF]	5
+Calmodulin-dependent protein kinase II alpha substrate motif	[MILVFY][A-Z][R][A-Z][A-Z][ST][MILVFY]	5
+Calmodulin-dependent protein kinase II substrate motif	[R][A-Z][A-Z][ST]	3
+Calmodulin-dependent protein kinase II substrate motif	[KF][RK][QM][QMKLF][S][FIMLV][DEI][LMKI][FK]	4
+Calmodulin-dependent protein kinase II substrate motif	[MVLIF][A-Z][RK][A-Z][A-Z][ST][A-Z][A-Z]	5
+Calmodulin-dependent protein kinase II substrate motif	[R][A-Z][A-Z][S]	3
+Calmodulin-dependent protein kinase IV substrate motif	[V][P][G][K][A][R][K][K][S][S][C][Q][L][L]	8
+Calmodulin-dependent protein kinase IV substrate motif	[P][L][A][R][T][L][S][V][A][G][L][P]	6
+Calmodulin-dependent protein kinase IV substrate motif	[MILVFY][A-Z][R][A-Z][A-Z][ST]	5
+Casein kinase I delta substrate motif	[E][FE][D][TAG][G][S][I][IFYG][IGF][FG][FPL]	5
+Casein kinase I gamma substrate motif	[Y][YE][DY][AD][AG][S][I][IYFG][IGF][FG][FPL]	5
+Casein kinase I substrate motif	[DE][A-Z][A-Z][ST]	3
+Casein kinase II substrate motif	[EDA][DE][ED][ED][S][EDA][DEA][ED][ED]	4
+Casein kinase II substrate motif	[S][A-Z][EST]	0
+Casein kinase II substrate motif	[S][A-Z][A-Z][EST]	0
+Casein kinase II substrate motif	[ST][A-Z][A-Z][ED]	0
+Casein kinase II substrate motif	[S][D][A-Z][E]	0
+Casein kinase II substrate motif	[S][A-Z][A-Z][ED]	0
+Casein kinase II substrate motif	[S][DE][A-Z][DE][A-Z][DE]	0
+Casein kinase II substrate motif	[DE][S][DE][A-Z][DE]	1
+Casein kinase II substrate motif	[S][DE][DE][DE]	0
+Casein kinase II substrate motif	[ST][A-Z][A-Z][DE]	0
+Casein kinase II substrate motif	[ST][A-Z][A-Z][EDSY]	0
+Casein kinase II substrate motif	[SEPG][DSNEP][EDGQW][YEDSWT][WED][S][DE][DEWN][ED][EDNQ]	5
+Cdc2 kinase substrate motif	[RK][S][P][RP][RKH]	1
+Cdc2 kinase substrate motif	[ST][P][A-Z][RK]	0
+Cdc2 kinase substrate motif	[H][H][H][RK][S][P][R][RK][R]	4
+Cdc2 like protein kinase substrate motif	[P][A-Z][ST][P][K][K][A-Z][K][K]	2
+CDK1,2,4,6 kinase substrate motif	[ST][P][A-Z][RK]	0
+CDK kinase substrate motif	[S][P][A-Z][RK][A-Z]	0
+CDK4 kinase substrate motif	[P][L][ST][P][I][P][KRH]	2
+CDK4 kinase substrate motif	[P][L][ST][P][A-Z][KRH]	2
+CDK5 kinase substrate motif	[T][P][A-Z][K]	0
+CDK5 kinase substrate motif	[KHG][H][HP][KGH][S][P][RK][HRK][RHK]	4
+CDK5 kinase substrate motif	[ST][P][G][ST][P][G][T][P]	3
+Chk1 kinase substrate motif	[MILV][A-Z][RK][A-Z][A-Z][ST]	5
+CLK1 kinase substrate motif	[R][A-Z][A-Z][ST][A-Z][A-Z][R]	3
+CLK1,2 kinase substrate motif	[RK][A-Z][RK][A-Z][RK][A-Z][S][A-Z][A-Z][R]	6
+CLK2 kinase substrate motif	[R][RH][RH][RE][R][E][RH][S][R][RD][L]	7
+DMPK1 kinase substrate motif	[K][K][A-Z][R][R][T][LV][A-Z]	5
+DMPK1 kinase substrate motif	[K][K][R][A-Z][R][T][LV][A-Z]	5
+DMPK1 kinase substrate motif	[RK][A-Z][R][R][A-Z][ST][LV][A-Z]	5
+DMPK1,2 kinase substrate motif	[R][A-Z][A-Z][ST][LV][R]	3
+DNA dependent Protein kinase substrate motif	[A-Z][S][Q]	1
+DNA dependent Protein kinase substrate motif	[P][ST][A-Z]	1
+DOA/CDC-like kinase 2 substrate motif	[R][RK][R][ER][R][EA][HR][S][R][R][RD][LE]	7
+Doublecortin kinase-1 kinase substrate motif	[ILVFM][R][R][A-Z][A-Z][ST][ILMVF]	5
+elF2 alpha kinase substrate motif	[E][A-Z][S][A-Z][R][A-Z][A-Z][R]	2
+ERK1 kinase substrate motif	[TPS][GPEY][PLI][LMP][S][P][GPF][PFGY][FYI]	4
+ERK1 kinase substrate motif	[T][E][Y]	0
+ERK1,2 kinase substrate motif	[P][A-Z][ST][P][P]	2
+ERK1,2 kinase substrate motif	[A-Z][A-Z][P][A-Z][ST][P][P][P][A-Z]	4
+ERK1,2 kinase substrate motif	[P][A-Z][ST][P]	2
+ERK1,2 kinase substrate motif	[S][P]	0
+ERK1, ERK2, SAPK, CDK5 and GSK3 kinase substrate motif	[K][S][P][P]	1
+ERK2 kinase substrate motif	[DYWE][C][PSCE][PCSLTV][LMT][S][PA][TSGRCF][WPS][WF]	5
+G protein-coupled receptor kinase 1 substrate motif	[A-Z][A-Z][ST][E]	2
+G protein-coupled receptor kinase 1 substrate motif	[A-Z][ST][A-Z][A-Z][A-Z][APST]	1
+Growth associated histone HI kinase substrate motif	[ST][ST][P][A-Z][KR]	1
+Growth associated histone HI kinase substrate motif	[KR][ST][P]	1
+Growth associated histone HI kinase substrate motif	[ST][P][KR]	0
+GSK3 kinase substrate motif	[S][A-Z][A-Z][A-Z][S]	0
+GSK3, Erk1, Erk2 and CDK5 kinase motif	[P][A-Z][T][P]	2
+GSK-3, ERK1, ERK2, CDK5 substrate motif	[R][A-Z][A-Z][S][P][V]	3
+GSK-3, ERK1, ERK2, CDK5 substrate motif	[K][ST][P][A-Z][K]	1
+GSK-3, ERK1, ERK2, CDK5 substrate motif	[K][S][P][A-Z][A-Z][A-Z][K]	1
+GSK-3, ERK1, ERK2, CDK5 substrate motif	[K][S][P][A-Z][A-Z][K]	1
+GSK-3, ERK1, ERK2, CDK5 substrate motif	[K][S][P][A-Z][A-Z][A-Z][A-Z][K]	1
+GSK-3, ERK1, ERK2, CDK5 substrate motif	[K][T][P][A][K][E][E]	1
+GSK-3, ERK1, ERK2, CDK5 substrate motif	[P][A-Z][S][P]	2
+GSK-3, ERK1, ERK2, CDK5 substrate motif	[A-Z][ST][P]	1
+GSK-3, ERK1, ERK2, CDK5 substrate motif	[A-Z][A-Z][S][P]	2
+HMGCoA Reductase kinase substrate motif	[MLVIF][RKH][A-Z][A-Z][S][A-Z][A-Z][A-Z][MLVIF]	4
+JNK1 kinase substrate motif	[G][P][QM][S][P][I]	3
+LKB1 kinase substrate motif	[L][R][T]	2
+MAPKAPK1 kinase substrate motif	[RK][A-Z][R][A-Z][A-Z][S]	5
+MAPKAPK1 kinase substrate motif	[R][R][R][A-Z][S]	4
+MAPKAPK2 kinase substrate motif	[LFI][A-Z][A-Z][A-Z][R][QST][L][ST][MLIV]	7
+MAPKAPK2 kinase substrate motif	[A-Z][A-Z][ND][A-Z][R][A-Z][A-Z][S][A-Z][A-Z]	7
+MAPKAPK2 kinase substrate motif	[S][A-Z][A-Z][A-Z][ST]	4
+MAPK 11,13,14 kinase substrate motif	[T][GPE][Y]	0
+MEKK kinase substrate motif	[R][R][F][G][S][ND][R][R][F]	4
+MEKK kinase substrate motif	[R][R][F][G][S][MLVIF][R][R][MLVIF]	4
+MLCK kinase substrate motif	[K][K][R][A-Z][A-Z][S][A-Z][RK][RK]	5
+mTOR kinase substrate motif	[F][T][Y]	1
+Nek 2 kinase substrate motif	[I][R][R][L][S][T][R][R][R]	4
+NIMA kinase substrate motif	[RN][FLM][RK][RK][S][RIVM][RIMV][MIFV][IFM]	4
+NIMA kinase substrate motif	[F][R][A-Z][ST]	3
+NIMA kinase substrate motif	[R][F][RK][RK][S][RI][RI][M][I]	4
+p70 Ribosomal S6 kinase substrate motif	[RK][A-Z][R][A-Z][A-Z][ST][MLVI]	5
+p70 Ribosomal S6 kinase substrate motif	[V][F][L][G][F][T][Y][V][A][P]	5
+PAK1 kinase substrate motif	[A][K][R][R][R][L][S][S][S][L][R][A]	8
+PAK1 kinase substrate motif	[V][R][K][R][T][L][R][R][L]	4
+PAK2 kinase substrate motif	[RK][RA-Z][A-Z][ST]	3
+PDK1 kinase substrate motif	[F][A-Z][A-Z][F][ST][FY]	4
+Phosphorylase kinase substrate motif	[K][R][K][Q][I][S][V][R]	5
+Phosphorylase kinase substrate motif	[FMK][RK][MRQF][MFLI][S][S][FIML][FRK][LI][FLI]	5
+Phosphorylase kinase substrate motif	[KR][A-Z][A-Z][S][VI]	3
+Pim1 kinase substrate sequence	[RK][RK][RK][A-Z][ST][A-Z]	4
+Pim2 kinase substrate sequence	[RK][RKAQP][RK][RQHNY][PHK][S][GST][PSGQHST][SPQGD][TSPG]	5
+PKA kinase substrate motif	[R][R][A-Z][S][MILVFY]	3
+PKA kinase substrate motif	[R][A-Z][S]	2
+PKA kinase substrate motif	[K][R][A-Z][A-Z][S]	4
+PKA kinase substrate motif	[R][A-Z][A-Z][S]	3
+PKA kinase substrate motif	[RK][A-Z][ST]	2
+PKA kinase substrate motif	[K][A-Z][A-Z][ST]	3
+PKA kinase substrate motif	[RK][RK][A-Z][ST]	3
+PKA kinase substrate motif	[K][A-Z][A-Z][A-Z][ST]	4
+PKA kinase substrate motif	[ST][A-Z][RK]	0
+PKA kinase substrate motif	[R][R][R][R][S][I][I][F][I]	4
+PKA kinase substrate motif	[R][R][A-Z][S]	3
+PKA kinase substrate motif	[R][RK][A-Z][ST][ILVFY][DCA-Z][A-Z][D]	3
+PKA kinase substrate motif	[R][R][A-Z][S]	3
+PKA kinase substrate motif	[R][R][R][RN][S][I][I][FD]	4
+PKA kinase substrate motif	[RCPK][RAP][RK][RKS][NLSMP][S][ILVC][SPHQ][SWQ][SLG]	5
+PKA, PKG kinase substrate motif	[R][RK][A-Z][ST][ND]	3
+PKC alpha kinase substrate motif	[A][R][K][G][S][L][R][Q]	4
+PKC alpha kinase substrate motif	[R][RF][R][R][RK][G][S][F][RK][RK]	6
+PKC beta kinase substrate motif	[LRF][RK][R][KQ][G][S][FM][K][K][A-Z][A]	5
+PKC delta kinase substrate motif	[R][A-Z][R][K][G][S][F]	5
+PKC epsilon kinase substrate motif	[K][R][Q][G][S][V][R][R]	4
+PKC epsilon kinase substrate motif	[R][KER][A-Z][S]	3
+PKC eta kinase substrate motif	[A][R][A-Z][A-Z][R][RK][R][S][F][R][R]	7
+PKC family kinase substrate motif	[F][A-Z][A-Z][F][ST][ST][FY]	5
+PKC gamma kinase substrate motif	[R][R][R][K][GK][S][F][RK][RK][K][A]	5
+PKC kinase substrate motif	[A-Z][R][A-Z][A-Z][S][A-Z][R][A-Z]	4
+PKC kinase substrate motif	[ST][A-Z][RK]	0
+PKC kinase substrate motif	[RK][A-Z][A-Z][ST]	3
+PKC kinase substrate motif	[RK][A-Z][A-Z][ST][A-Z][RK]	3
+PKC kinase substrate motif	[KR][A-Z][ST]	2
+PKC kinase substrate motif	[RK][A-Z][ST][A-Z][RK]	2
+PKC mu kinase substrate motif	[LV][VLA][R][QKE][M][S]	5
+PKC theta kinase substrate motif	[RFWM][WAKS][RSKH][RHSQ][RKNPGQ][S][IFRVKSLM][KMRST][RSKW][RKG]	5
+PKC zeta kinase substrate motif	[F][A-Z][R][A-Z][A-Z][S][FM][FM]	5
+PKD kinase substrate motif	[LVI][RKQ][RK][RKTQM][NKRLMH][S][FWIMLV][SN][RSPYW][SRNL]	5
+PKG kinase substrate motif	[R][RK][A-Z][ST][ND]	3
+PKR kinase substrate motif	[R][A-Z][A-Z][ST][A-Z][R][A-Z][A-Z][R]	3
+Plk1 kinase substrate motif	[DE][A-Z][ST][ILVM][A-Z][DE]	2
+Pyruvate dehydrogenase kinase substrate motif	[A-Z][S][A-Z][A-Z][D][A-Z][A-Z]	1
+RAF1 kinase substrate motif	[P][L][T][L][P]	2
+RAF1 kinase substrate motif	[P][L][L][T][P]	3
+RAF1 kinase substrate motif	[P][L][T][P]	2
+RAF1 kinase substrate motif	[P][T][L][P]	1
+RAF1 kinase substrate motif	[P][L][T][L][P]	2
+RAF1 kinase substrate motif	[P][T][L][P]	1
+RAF1 kinase substrate motif	[L][T][P]	1
+TGF beta receptor kinase substrate motif	[K][K][K][K][K][K][ST][A-Z][A-Z][A-Z]	6
+TGF beta receptor kinase substrate motif	[RKQN][MCW][RTSN][EDSN][RKEDN][S][SDE][SD][RN][NHSRC]	5
+ZIP kinase substrate motif	[R][R][A-Z][A-Z][S]	4
+ZIP kinase substrate motif	[K][R][A-Z][R][S]	4
+ZIP kinase substrate motif	[K][R][R][A-Z][T]	4
+Dual specificity protein phosphatase 1 substrate motif	[T][E][Y]	0
+Dual specificity protein phosphatase 6 substrate motif	[T][A-Z][Y]	0
+PP2A, PP2C substrate motif	[R][R][A][ST][V][A]	3
+PP2B substrate motif	[A-Z][R][A-Z][A-Z][S][V][A]	4
+PP2C delta substrate motif	[A-Z][T][A-Z][Y][A-Z]	1
+14-3-3 domain binding motif	[K][C][S][T][W][P]	3
+14-3-3 domain binding motif	[R][A-Z][A-Z][S]	3
+14-3-3 domain binding motif	[R][A-Z][R][A-Z][A-Z][S][A-Z][P]	5
+14-3-3 domain binding motif	[Y][T][V]	1
+14-3-3 domain binding motif	[R][S][A-Z][ST][A-Z][P]	3
+14-3-3 domain binding motif	[R][A-Z][YF][A-Z][S][A-Z][P]	4
+14-3-3 domain binding motif	[R][P][V][S][S][A][A][S][V][Y]	7
+BARD1 BRCT domain binding motif	[S][DE][DE][E]	0
+Beta-TrCP1 domain binding motif	[D][S][G][A-Z][A-Z][S]	5
+BRCA1 BRCT domain binding motif	[S][FYH][VFY][FY]	0
+CDC4 WD40 domain binding motif	[IL][ILP][T][P][RK]	2
+Chk2 FHA domain binding motif	[H][F][D][T][Y][L][I]	3
+FHA domain binding motif	[RDH][LY][LM][KA][T][QLMEV][KLIR]	4
+MDC1 BRCT domain binding motif	[S][ST][A-Z]	1
+Plk1 PBD domain binding motif	[S][ST][A-Z]	1
+RAD9 BRCT domain binding motif	[S][Y][I][I]	0
+WW domain binding motif	[ST][P]	0
+Abl kinase substrate motif	[Y][M][A-Z][M]	0
+Abl kinase substrate motif	[E][D][A][I][Y]	4
+Abl kinase substrate motif	[A-Z][V][I][Y][A][A][P][F]	3
+Abl kinase substrate motif	[E][A][I][Y][A][A][P][F]	3
+Abl kinase substrate motif	[E][E][I][Y][E][E][Y]	6
+Abl kinase substrate motif	[E][E][I][Y][E][E][Y]	3
+Abl kinase substrate motif	[E][A-Z][I][Y][A-Z][A-Z][P][A-Z]	3
+Abl kinase substrate motif	[E][E][I][Y][Y][Y][V][H]	3
+Abl kinase substrate motif	[E][R][I][Y][A][R][T][K]	3
+Abl kinase substrate motif	[A][E][V][IVLF][Y][A][A][PF][F]	4
+ALK kinase substrate motif	[Y][A-Z][A-Z][Y][Y]	0
+ALK kinase substrate motif	[Y][DE][A-Z][ILVM]	0
+ALK kinase substrate motif	[DE][A-Z][A-Z][Y]	3
+ALK kinase substrate motif	[Y][A-Z][A-Z][A-Z][A-Z][FY]	0
+CSK kinase substrate motif	[E][E][DE][I][Y][F][F][F][F]	4
+CSK kinase substrate motif	[A-Z][A-Z][A-Z][I][Y][MIF][F][F][F]	4
+EGFR kinase substrate motif	[E][E][E][E][Y][F][E][L][V]	4
+EGFR kinase substrate motif	[EDRA][DE][DE][EDI][Y][FVIE][EFD][LIFV][V]	4
+EGFR kinase substrate motif	[A-Z][DE][Y][A-Z]	2
+EGFR kinase substrate motif	[Y][I][P][P]	0
+EGFR kinase substrate motif	[A-Z][DE][Y][ILV]	2
+Fes kinase substrate motif	[E][E][E][I][Y][E][E][I][E]	4
+Fes kinase substrate motif	[EAD][EA][EA][IEV][Y][DE][DE][IVE][EIV]	4
+FGFR kinase substrate motif	[E][E][E][Y][F][F][L][F]	3
+FGFR kinase substrate motif	[A][EA][E][E][Y][FV][F][LFMIV][F]	4
+Fgr kinase substrate motif	[M][E][EN][IV][Y][GE][I][F][F]	4
+IGF1 receptor kinase substrate motif	[K][K][K][S][P][G][E][Y][V][N][I][E][F][G]	7
+Insulin receptor kinase substrate motif	[Y][M][A-Z][M]	0
+Insulin receptor kinase substrate motif	[E][E][END][Y][MF][MF][MFIE][MF]	3
+Insulin receptor kinase substrate motif	[A-Z][E][E][E][Y][M][M][M][M]	4
+Insulin receptor kinase substrate motif	[K][K][S][R][G][D][Y][M][T][M][Q][I][G]	6
+Insulin receptor kinase substrate motif	[K][K][K][L][P][A][T][G][D][Y][M][N][M][S][P][V][G][D]	9
+JAK2 kinase substrate motif	[Y][A-Z][A-Z][LIV]	0
+JNK kinase substrate motif	[T][P][Y]	2
+Lck kinase substrate motif	[A-Z][E][A-Z][I][Y][G][V][L][F]	4
+Lck kinase substrate motif	[E][A-Z][IVLF][Y][GA][V][LVFI][FLVI]	3
+Lyn kinase substrate motif	[D][E][E][I][Y][EG][E][L][A-Z]	4
+Lyn kinase substrate motif	[DE][A-Z][A-Z][A-Z][A-Z][A-Z][A-Z][A-Z][DE][A-Z][A-Z][Y][A-Z][A-Z][L][A-Z][A-Z][A-Z][A-Z][A-Z][A-Z][A-Z][Y][A-Z][A-Z][LI]	11
+PDGFR kinase substrate motif	[E][E][E][E][Y][V][F][I][A-Z]	4
+PDGFR kinase substrate motif	[LN][RI][T][Y]	3
+PDGFR kinase substrate motif	[DE][DE][DE][DE][Y][VEI][F][IVF]	4
+Src family kinase substrate motif	[DE][A-Z][A-Z][A-Z][A-Z][A-Z][A-Z][A-Z][DE][A-Z][A-Z][Y][A-Z][A-Z][L][A-Z][A-Z][A-Z][A-Z][A-Z][A-Z][A-Z][Y][A-Z][A-Z][LI]	11
+Src family kinase substrate motif	[IVLS][A-Z][Y][A-Z][A-Z][LI]	2
+Src kinase substrate motif	[Y][M][A-Z][M]	0
+Src kinase substrate motif	[Y][I][Y][G][S][F][K]	2
+Src kinase substrate motif	[E][E][E][I][Y][GE][E][F][D]	4
+Src kinase substrate motif	[D][DE][EDG][IVL][Y][GE][E][FI][F]	4
+Src kinase substrate motif	[DE][A-Z][A-Z][A-Z][A-Z][A-Z][A-Z][A-Z][DE][A-Z][A-Z][Y][A-Z][A-Z][L][A-Z][A-Z][A-Z][A-Z][A-Z][A-Z][A-Z][Y][A-Z][A-Z][LI]	11
+Src kinase substrate motif	[DE][DE][EDG][IVL][Y][GED][E][FILV][DE]	4
+Src kinase substrate motif	[Y][AGSTDE]	0
+Syk kinase substrate motif	[EDTY][A-Z][Y][E][E]	2
+PTP1B phosphatase substrate motif	[DE][Y][Y][RK]	2
+PTP1B phosphatase substrate motif	[DE][Y][Y][RK]	1
+PTP1B phosphatase substrate motif	[E][F][Y][GA][T][Y][GA]	2
+PTP1B phosphatase substrate motif	[E][YFD][Y][M]	2
+PTP1B phosphatase substrate motif	[EP][MLIVF][Y][GA][A-Z][MLIVFY][A]	2
+PTP1B phosphatase substrate motif	[R][D][A-Z][Y][A-Z][T][D][Y][Y][R]	8
+PTP1B phosphatase substrate motif	[E][FDY][Y]	2
+PTP1B, TC-PTP phosphatase substrate motif	[D][Y][Y][R]	2
+PTP1B, TC-PTP phosphatase substrate motif	[D][Y][Y][R]	1
+PTPRH phosphatase substrate motif	[DE][F][Y][GA][FY][AG]	2
+PTPRJ phosphatase substrate motif	[F][MLVI][Y]	2
+SHP1 phosphatase substrate motif	[DE][A-Z][LIV][A-Z][Y][A-Z][A-Z][LIV]	4
+SHP1 phosphatase substrate motif	[DE][A-Z][LIV][A-Z][A-Z][Y][A-Z][A-Z][LIV]	5
+SHP1 phosphatase substrate motif	[DE][DE][DE][L][A-Z][Y][A-Z][A-Z][FMLVI][DE]	5
+SHP1 phosphatase substrate motif	[DE][A-Z][Y]	2
+SHP1 phosphatase substrate motif	[EP][FIL][Y][Y][A][A-Z][FILV]	3
+SHP2 phosphatase substrate motif	[Y][I][D][L]	0
+SHP2 phosphatase substrate motif	[Y][A][S][I]	0
+SHP2 phosphatase substrate motif	[E][F][Y][A][A-Z][VI][G][RKH][S]	2
+TC-PTP phosphatase substrate motif	[DE][DE][A-Z][A-Z][A-Z][Y][V][A]	5
+TC-PTP phosphatase substrate motif	[EDY][Y]	1
+3BP2 SH2 domain binding motif	[Y][EMV][NVI]	0
+Abl SH2 domain binding motif	[Y][E][N][P]	0
+Crk SH2 domain binding motif	[Y][A-Z][A-Z][P]	0
+Crk SH2 domain binding motif	[Y][D][H][P]	0
+Csk SH2 domain binding motif	[Y][TAS][KRQN][MIVR]	0
+Grb2 SH2 domain binding motif	[Y][YIV][N][FLIV]	0
+Fes SH2 domain binding motif	[Y][E][A-Z][VI]	0
+Fgr SH2 domain binding motif	[Y][E][E][IV]	0
+Fyn SH2 domain binding motif	[Y][E][D][P]	0
+GRB2, 3BP2, Csk, Fes, Syk C-terminal SH2 domain binding motif	[Y][Y][MILV][A-Z][MILV]	1
+Grb2 SH2 domain binding motif	[Y][QYV][N][YQF]	0
+Grb2 SH2 domain binding motif	[Y][A-Z][N]	0
+GRB7, GRB10 SH2 domain binding motif	[FY][Y][ETYS][N][ILVPTYS]	1
+HCP SH2 domain binding motif	[Y][F][A-Z][FPLY]	0
+Itk SH2 domain binding motif	[Y][AEV][YFESNV][PFIH]	0
+Lck and Src SH2 domain binding motif	[Y][D][Y][V]	0
+Nck SH2 domain binding motif	[Y][D][E][P]	0
+PI3 kinase p85 SH2 domain binding motif	[Y][M][A-Z][M]	0
+PI3 kinase p85 SH2 domain binding motif	[Y][A-Z][A-Z][M]	0
+PI3 kinase p85 SH2 domain binding motif	[Y][M][P][M][S]	0
+PLCgamma C and N-terminal SH2 domain binding motif	[Y][LIV][E][LIV]	0
+RasGAP C-terminal SH2 domain binding motif	[Y][A-Z][A-Z][P]	0
+RasGAP N-terminal SH2 domain binding motif	[Y][I][L][V][A-Z][MLIVP]	0
+SAP and EAT2 SH2 domain binding motif	[T][I][Y][A-Z][A-Z][VI]	2
+Sem5 SH2 domain binding motif	[Y][LV][N][VP]	0
+Shb SH2 domain binding motif	[Y][TVI][A-Z][L]	0
+SHC SH2 domain binding motif	[Y][IEYL][A-Z][ILM]	0
+SHIP2 SH2 domain binding motif	[IVLS][A-Z][Y][A-Z][A-Z][LI]	2
+SHP1 C-terminal SH2 domain binding motif	[VIL][A-Z][Y][A][A-Z][LV]	2
+SHP1 C-terminal SH2 domain binding motif	[A-Z][A-Z][Y][Y][M][KR]	2
+SHP1 N-terminal SH2 domain binding motif	[L][YH][Y][MF][A-Z][FM]	2
+SHP1 N-terminal SH2 domain binding motif	[L][A-Z][Y][A][A-Z][L]	2
+SHP1 SH2 domain binding motif	[IV][A-Z][Y][A-Z][A-Z][LV]	2
+SHP1, SHP2 SH2 domain binding motif	[VIL][A-Z][Y][MLF][A-Z][P]	2
+SHP2 CSH2 domain binding motif	[TVIY][A-Z][Y][ASTV][A-Z][IVL]	2
+SHP2 C-terminal SH2 domain binding motif	[ILV][ILV][ILVFTY][Y][TILV][IL][ILVP]	3
+SHP2 N-terminal SH2 domain binding motif	[HF][A-Z][V][A-Z][TSA][Y]	5
+SHP2 N-terminal SH2 domain binding motif	[IVL][A-Z][Y][FM][A-Z][P]	2
+SHP2 N-terminal SH2 domain binding motif	[Y][IV][A-Z][IV]	0
+SHP2 N-terminal SH2 domain binding motif	[ILVM][A-Z][Y][TVA][A-Z][IVLF]	2
+SHP2 N-terminal SH2 domain binding motif	[IV][A-Z][Y][LMT][Y][APT][S][G]	2
+SHP2 N-terminal SH2 domain binding motif	[W][MTV][Y][YR][IL][A-Z]	2
+SHP2, PLCgamma SH2 domain binding motifs	[Y][I][P][P]	0
+Src and Abl SH2 domain binding motif	[Y][M][A-Z][M]	0
+Src, Fyn, Lck, Fgr, Abl, Crk, Nck SH2 domain binding motif	[Y][RKHQED][RKHQED][IP]	0
+Src, Fyn,Csk, Nck and SHC SH2 domain binding motif	[P][P][A-Z][Y]	3
+Src,Lck and Fyn SH2 domains binding motif	[Y][E][E][I]	0
+STAT1 SH2 domain binding motif	[Y][DE][PR][RPQ]	0
+STAT3 SH2 domain binding motif	[Y][A-Z][A-Z][Q]	0
+STAT3 SH2 domain binding motif	[Y][MLVIF][PRKH][Q]	0
+Syk C-terminal SH2 domain binding motif	[Y][QTE][EQ][LI]	0
+Syk N-terminal SH2 domain binding motif	[Y][T][T][ILM]	0
+Syk, ZAP-70, Shc, Lyn SH2 domain binding motif	[DE][A-Z][A-Z][A-Z][A-Z][A-Z][A-Z][A-Z][DE][A-Z][A-Z][Y][A-Z][A-Z][L][A-Z][A-Z][A-Z][A-Z][A-Z][A-Z][A-Z][Y][A-Z][A-Z][LI]	11
+Tensin SH2 domain binding motif	[Y][E][N][FIV]	0
+Vav SH2 domain binding motif	[Y][MLE][E][P]	0
+Vav SH2 domain binding motif	[Y][E][S][P]	0
+Cbl PTB domain binding motif	[D][ND][A-Z][Y]	3
+Dok1 PTB domain binding motif	[N][A-Z][L][Y]	3
+FRIP PTB domain binding motif	[N][A-Z][A-Z][Y]	3
+Shc PTB domain binding motif	[N][P][A-Z][Y]	3
+Shb PTB domain binding motif	[D][D][A-Z][Y]	3
+ShcA PTB domain binding motif	[N][P][A-Z][Y][F][A-Z][R]	3
+ShcC PTB domain binding motif	[H][N][MLVI][MLVIN][N][P][ST][Y]	7

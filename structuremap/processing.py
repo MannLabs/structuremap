@@ -1678,3 +1678,58 @@ def evaluate_ptm_colocalization(
     res_df['std_random_fraction'] = np.where(
         res_df.variable == 'Observed', 0, res_df.std_random_fraction)
     return res_df
+
+
+def extract_motifs_in_proteome(
+    alphafold_df: pd.DataFrame,
+    motif_df: pd.DataFrame
+):
+    """
+    Function to find occurences of short linear motifs in the proteome.
+
+    Parameters
+    ----------
+    alphafold_df : pd.DataFrame
+        Dataframe with AlphaFold annotations.
+    motif_df : pd.DataFrame
+        Dataframe with following columns: 'enzyme', 'motif', 'mod_pos'.
+
+    Returns
+    -------
+    : pd.DataFrame
+        Dataframe containing information about short linear motifs in the
+        proteome. Following columns are privided: 'protein_id', 'enzyme',
+        'motif','position','AA','motif_start','motif_end','sequence_window'
+    """
+    proteins = list()
+    enzyme_list = list()
+    motif_list = list()
+    site_list = list()
+    start_list = list()
+    end_list = list()
+    AA_list = list()
+    sequence_window_list = list()
+    for df_prot in partition_df_by_prots(alphafold_df):
+        df_prot['flexible_pattern'] = 0
+        protein_accession = df_prot.protein_id.values[0]
+        sequence = ''.join(df_prot.AA)
+        for i in np.arange(0, motif_df.shape[0]):
+            for j in re.finditer(motif_df.motif.values[i], sequence):
+                proteins.append(protein_accession)
+                enzyme_list.append(motif_df.enzyme.values[i])
+                motif_list.append(motif_df.motif.values[i])
+                site_list.append(j.start() + motif_df.mod_pos.values[i] + 1)
+                start_list.append(j.start() + 1)
+                end_list.append(j.end())
+                AA_list.append(sequence[j.start() + motif_df.mod_pos.values[i]])
+                sequence_window_list.append(sequence[(j.start() + motif_df.mod_pos.values[i] - 10): (j.start() + motif_df.mod_pos.values[i] + 10)])
+    motif_res = pd.DataFrame({
+        'protein_id': proteins,
+        'enzyme': enzyme_list,
+        'motif': motif_list,
+        'position': site_list,
+        'AA': AA_list,
+        'motif_start': start_list,
+        'motif_end': end_list,
+        'sequence_window': sequence_window_list})
+    return motif_res
