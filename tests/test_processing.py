@@ -320,7 +320,7 @@ class TestProcessing(unittest.TestCase):
         np.testing.assert_equal([1,1,1,1,1,1,1,1,1,1,0,0], test_res.score_extended_2.values)
         np.testing.assert_equal([0,0,0,0,0,0,0,0,0,1,1,1], test_res.score_2_extended_2.values)
 
-    def test_get_mod_ptm_fraction():
+    def test_get_mod_ptm_fraction(self, ):
         # Example with 2 proteins and 2 randomizations
         # 1st protein with 3 modified lysines and 3 STY sites > 1 phospho
         # 2nd protein with 2 modified lysines and 4 STY sites > 2 phospho
