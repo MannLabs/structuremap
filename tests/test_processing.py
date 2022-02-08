@@ -32,7 +32,8 @@ from structuremap.processing import download_alphafold_cif, \
     find_idr_pattern, \
     annotate_proteins_with_idr_pattern, \
     extend_flexible_pattern, \
-    get_extended_flexible_pattern
+    get_extended_flexible_pattern, \
+    get_mod_ptm_fraction
 
 
 THIS_FOLDER = os.path.dirname(__file__)
