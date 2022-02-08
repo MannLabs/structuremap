@@ -1341,7 +1341,8 @@ def get_extended_flexible_pattern(
     Returns
     -------
     : pd.DataFrame
-        Input dataframe with additional columns containing the extended patterns.
+        Input dataframe with additional columns containing the extended
+        patterns.
     """
     df_out = []
     for df_prot in partition_df_by_prots(df):
@@ -1353,3 +1354,198 @@ def get_extended_flexible_pattern(
         df_out.append(df_prot)
     df_out = pd.concat(df_out)
     return df_out
+
+
+def calculate_distances(
+    background_idx_list,
+    target_aa_idx,
+    coords,
+    positions,
+    error_dist
+) -> [list, list]:
+    distance_res = list()
+    distance_1D_res = list()
+    for idx_list in background_idx_list:
+        aa_dist_list = list()
+        aa_1D_dist_list = list()
+        for i in idx_list:
+            aa_dist = list()
+            aa_1D_dist = list()
+            for aa_i in target_aa_idx:
+                aa_dist_i = get_3d_dist(
+                    coordinate_array_1=coords,
+                    coordinate_array_2=coords,
+                    idx_1=i,
+                    idx_2=aa_i)
+                aa_error_i = get_paired_error(
+                    position=positions,
+                    error_dist=error_dist,
+                    idx_1=i,
+                    idx_2=aa_i)
+                aa_dist.append(aa_dist_i+aa_error_i)
+                aa_1D_dist.append(abs(positions[i]-positions[aa_i]))
+            aa_dist_list.append(aa_dist)
+            aa_1D_dist_list.append(aa_1D_dist)
+        distance_res.append(aa_dist_list)
+        distance_1D_res.append(aa_1D_dist_list)
+    return distance_res, distance_1D_res
+
+
+def get_distance_list(
+    df: pd.DataFrame,
+    ptm_target: str,
+    ptm_background: str,
+    ptm_dict: dict,
+    error_dir: str,
+    filename_format: str = "pae_{}.hdf",
+    n_random: int = 10000,
+    random_seed: int = 44,
+) -> pd.DataFrame:
+    random.seed(random_seed)
+    prot_distances = list()
+    prot_distances_1D = list()
+    prot_mod_idx = list()
+    for df_prot in partition_df_by_prots(df):
+        protein_accession = df_prot.protein_id.values[0]
+        if error_dir is not None:
+            with h5py.File(
+                os.path.join(
+                    error_dir,
+                    filename_format.format(protein_accession))
+                    ) as hdf_root:
+                error_dist = hdf_root['dist'][...]
+            size = int(np.sqrt(len(error_dist)))
+            error_dist = error_dist.reshape(size, size)
+        else:
+            error_dist = np.zeros((df_prot.shape[0], df_prot.shape[0]))
+        # amino acid residues of background PTM
+        background_aa = ptm_dict[ptm_background]
+        # indices of background_aa
+        background_idx = df_prot[df_prot.AA.isin(background_aa)].index.tolist()
+        # number of observed background modifications
+        n_aa_background_mod = np.sum(df_prot[ptm_background] == 1)
+        if n_aa_background_mod >= 1:
+            # indices of observed background PTMs
+            real_background_idx = df_prot.index[df_prot[ptm_background] == 1].tolist()
+            # list of random index lists for background PTMs
+            background_idx_list = [random.sample(
+                background_idx,
+                len(real_background_idx)) for i in np.arange(0, n_random)]
+            # Combine real and random backround list with the real indices at
+            # position 0
+            background_idx_list.insert(0,real_background_idx)
+            # amino acid residues of target PTM
+            target_aa = ptm_dict[ptm_target]
+            # indices of target_aa
+            target_aa_idx = df_prot[df_prot.AA.isin(target_aa)].index.tolist()
+            # indices of observed target PTMs
+            target_mod_idx = df_prot.index[df_prot[ptm_target] == 1].tolist()
+            # index of observed PTMs within index list of all target_aa
+            target_aa_idx_mod_idx = [i for i in np.arange(len(target_aa_idx)) if target_aa_idx[i] in target_mod_idx]
+            distance_res, distance_1D_res = calculate_distances(
+                background_idx_list=np.array(background_idx_list),
+                target_aa_idx=np.array(target_aa_idx),
+                coords=np.vstack([
+                    df_prot.x_coord_ca.values,
+                    df_prot.y_coord_ca.values,
+                    df_prot.z_coord_ca.values]).T,
+                positions=df_prot.position.values,
+                error_dist=error_dist)
+            prot_distances.append(distance_res)
+            prot_distances_1D.append(distance_1D_res)
+            prot_mod_idx.append(target_aa_idx_mod_idx)
+    return prot_distances, prot_distances_1D, prot_mod_idx
+
+
+def get_mod_ptm_fraction(
+    distances,
+    mod_idx,
+    min_dist,
+    max_dist
+) -> float:
+    n_aa = [0]*len(distances[0])
+    n_aa_mod = [0]*len(distances[0])
+    for idx, p in enumerate(distances):
+        rand_count = 0
+        for rand in p:
+            for back in rand:
+                n_aa[rand_count] += len([i for i in back if ((i>min_dist) & (i<=max_dist))])
+                mod_back = [back[i] for i in mod_idx[idx]]
+                n_aa_mod[rand_count] += len([i for i in mod_back if ((i>min_dist) & (i<=max_dist))])
+            rand_count += 1
+    mod_fraction = [mod/aa if aa>0 else np.nan for aa,mod in zip(n_aa, n_aa_mod)]
+    return mod_fraction
+
+
+def evaluate_ptm_colocalization(
+    df: pd.DataFrame,
+    ptm_target: str,
+    ptm_types: list,
+    ptm_dict: dict,
+    pae_dir: str,
+    n_random=5,
+    random_seed=44,
+    min_dist=-0.01,
+    max_dist=35,
+    dist_step=5
+) -> pd.DataFrame:
+    distance_cutoffs = np.arange(min_dist, max_dist, dist_step)
+    cutoff_list = list()
+    ptm_list = list()
+    real_fraction_3D = list()
+    mean_random_fraction_3D = list()
+    std_random_fraction_3D = list()
+    real_fraction_1D = list()
+    mean_random_fraction_1D = list()
+    std_random_fraction_1D = list()
+    for ptm_type in ptm_types:
+        if ptm_target == 'self':
+            ptm_target = ptm_type
+        distances_3D, distances_1D, mod_idx = get_distance_list(
+            df=df,
+            ptm_target=ptm_target,
+            ptm_background=ptm_type,
+            ptm_dict=ptm_dict,
+            error_dir=pae_dir,
+            n_random=n_random,
+            random_seed=random_seed
+        )
+        for dist_cut in distance_cutoffs:
+            ptm_list.append(ptm_type)
+            cutoff_list.append(dist_cut+dist_step)
+            mod_fraction_3D = get_mod_ptm_fraction(
+                distances_3D, mod_idx,
+                min_dist=dist_cut,
+                max_dist=dist_cut+dist_step)
+            real_fraction_3D.append(mod_fraction_3D[0])
+            mean_random_fraction_3D.append(np.mean(mod_fraction_3D[1:]))
+            std_random_fraction_3D.append(np.std(mod_fraction_3D[1:]))
+            mod_fraction_1D = get_mod_ptm_fraction(
+                distances_1D, mod_idx,
+                min_dist=dist_cut,
+                max_dist=dist_cut+dist_step)
+            real_fraction_1D.append(mod_fraction_1D[0])
+            mean_random_fraction_1D.append(np.mean(mod_fraction_1D[1:]))
+            std_random_fraction_1D.append(np.std(mod_fraction_1D[1:]))
+    res_df_3D = pd.DataFrame({
+        'context': np.repeat('3D', len(cutoff_list)),
+        'cutoff': cutoff_list,
+        'ptm_types': ptm_list,
+        'Observed': real_fraction_3D,
+        'Random sampling': mean_random_fraction_3D,
+        'std_random_fraction': std_random_fraction_3D})
+    res_df_1D = pd.DataFrame({
+        'context': np.repeat('1D', len(cutoff_list)),
+        'cutoff': cutoff_list,
+        'ptm_types': ptm_list,
+        'Observed': real_fraction_1D,
+        'Random sampling': mean_random_fraction_1D,
+        'std_random_fraction': std_random_fraction_1D})
+    res_df_3D = res_df_3D.melt(
+        id_vars=["context", "ptm_types", "cutoff", "std_random_fraction"])
+    res_df_1D = res_df_1D.melt(
+        id_vars=["context", "ptm_types", "cutoff", "std_random_fraction"])
+    res_df = pd.concat([res_df_3D, res_df_1D])
+    res_df['std_random_fraction'] = np.where(
+        res_df.variable == 'Observed', 0, res_df.std_random_fraction)
+    return res_df

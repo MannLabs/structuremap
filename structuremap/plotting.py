@@ -113,3 +113,68 @@ def plot_enrichment(
     config = {'toImageButtonOptions': {
         'format': 'svg', 'filename': 'structure ptm enrichment'}}
     return(fig.show(config=config))
+
+
+def plot_ptm_colocalization(
+    df,
+    name='Fraction of modified acceptor residues',
+    context=None
+):
+    """
+    Plot PTMs co-localization.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Dataframe with results from evaluate_ptm_colocalization(.
+    name: str
+        Name of the resulting plot.
+        Default is 'Fraction of modified acceptor residues'.
+    context: str
+        Either '3D', '1D' or None.
+        Default is None, which shows both 1D and 3D results.
+
+    Returns
+    -------
+    : plot
+        Figure showing PTMs co-localization across distance bins.
+    """
+    if context in ['1D', '3D']:
+        df = df[df.context == context]
+        fig = px.scatter(
+            df,
+            x="cutoff",
+            y="value",
+            error_y="std_random_fraction",
+            color="variable",
+            facet_col="ptm_types",
+            facet_col_spacing=0.05,
+            labels={"value": "Fraction of modified acceptors",
+                    "ptm_types": "",
+                    "variable": ""},
+            color_discrete_sequence=['rgb(177, 63, 100)', 'grey'])
+        fig = fig.update_layout(width=1100, height=350)
+        fig = fig.update_yaxes(matches=None, showticklabels=True, col=1)
+        fig = fig.update_yaxes(matches=None, showticklabels=True, col=2)
+        fig = fig.update_yaxes(matches=None, showticklabels=True, col=3)
+        fig = fig.update_yaxes(matches=None, showticklabels=True, col=4)
+        fig = fig.update_yaxes(matches=None, showticklabels=True, col=5)
+    else:
+        fig = px.scatter(
+            df,
+            x="cutoff",
+            y="value",
+            error_y="std_random_fraction",
+            color="variable",
+            facet_row="ptm_types",
+            facet_col="context",
+            labels={"value": "Fraction of modified acceptors",
+                    "ptm_types": "",
+                    "variable": ""},
+            color_discrete_sequence=['rgb(177, 63, 100)', 'grey'])
+        fig = fig.update_layout(width=1000, height=1800)
+        fig = fig.update_yaxes(matches=None)
+    fig = fig.update_layout(title=name,
+                            template="simple_white")
+    config = {'toImageButtonOptions': {'format': 'svg', 'filename': name}}
+    return fig.show(config=config)

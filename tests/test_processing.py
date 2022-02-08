@@ -320,5 +320,47 @@ class TestProcessing(unittest.TestCase):
         np.testing.assert_equal([1,1,1,1,1,1,1,1,1,1,0,0], test_res.score_extended_2.values)
         np.testing.assert_equal([0,0,0,0,0,0,0,0,0,1,1,1], test_res.score_2_extended_2.values)
 
+    def test_get_mod_ptm_fraction():
+        # Example with 2 proteins and 2 randomizations
+        # 1st protein with 3 modified lysines and 3 STY sites > 1 phospho
+        # 2nd protein with 2 modified lysines and 4 STY sites > 2 phospho
+        distances = [
+            [[[10, 20, 30], [2, 10, 20], [5, 8, 30]],  # protein 1 > real
+             [[30, 20, 50], [20, 10, 20], [50, 10, 30]],  # protein 1 > random 1
+             [[20, 50, 10], [50, 40, 10], [50, 20, 30]]],  # protein 1 > random 2
+            [[[10, 10, 30, 50], [50, 10, 5, 50]],  # protein 2 > real
+             [[50, 20, 30, 40], [20, 20, 10, 80]],  # protein 2 > random 1
+             [[15, 10, 30, 10], [10, 10, 20, 20]]]]  # protein 2 > random 2
+        mod_idx = [[0],  # protein 1
+                   [1, 2]]  # protein 2
+        modidied_fraction = get_mod_ptm_fraction(
+            distances, mod_idx, min_dist=0, max_dist=10)
+        # Real:
+        # n_aa: 1,2,2,2,2
+        # n_mod: 1,1,1,1,2
+        # final: 9,6
+
+        # Random 1:
+        # n_aa: 0,1,1,0,1
+        # n_mod: 0,0,0,0,1
+        # final: 3,1
+
+        # Random 2:
+        # n_aa: 1,1,0,2,2
+        # n_mod: 0,0,0,1,1
+        # final: 6,2
+
+        # Fractions: 0.66, 0.33, 0.33
+
+        np.testing.assert_almost_equal(
+            modidied_fraction,
+            [0.66666666, 0.33333333, 0.33333333])
+        modidied_fraction = get_mod_ptm_fraction(
+            distances, mod_idx, min_dist=5, max_dist=10)
+        np.testing.assert_almost_equal(
+            modidied_fraction,
+            [0.5, 0.33333333, 0.33333333])
+
+
 if __name__ == "__main__":
     unittest.main()
