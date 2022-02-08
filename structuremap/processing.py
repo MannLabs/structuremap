@@ -468,7 +468,7 @@ def get_paired_error(
     ----------
     position : np.ndarray
         Array of amino acid positions from which to choose specific indeces.
-    error_dist: : np.ndarray
+    error_dist : np.ndarray
         Matrix of paired aligned errors of AlphaFold across all amino acids
         in a protein qequence.
     idx_1 : int
@@ -1357,12 +1357,36 @@ def get_extended_flexible_pattern(
 
 
 def calculate_distances(
-    background_idx_list,
-    target_aa_idx,
-    coords,
-    positions,
-    error_dist
+    background_idx_list: list,
+    target_aa_idx: np.ndarray,
+    coords: np.ndarray,
+    positions: np.ndarray,
+    error_dist: np.ndarray
 ) -> [list, list]:
+    """
+    Calculate the distances from a target amino acid to a list of background
+    amino acids.
+
+    Parameters
+    ----------
+    background_idx_list : list
+        List of amino acid indices that make up the background.
+    target_aa_idx : np.ndarray
+        Array of target amino acid indices.
+    coords : np.ndarray
+        Array of 3D coordinates of alpha carbon atoms across different
+        amino acids.
+    positions : np.ndarray
+        Array of amino acid positions from which to choose the specific indeces.
+    error_dist: : np.ndarray
+        Matrix of paired aligned errors of AlphaFold across all amino acids
+        in a protein qequence.
+
+    Returns
+    -------
+    : [list, list]
+        List of 3D distance results and list of 1D distance results
+    """
     distance_res = list()
     distance_1D_res = list()
     for idx_list in background_idx_list:
@@ -1400,7 +1424,42 @@ def get_distance_list(
     filename_format: str = "pae_{}.hdf",
     n_random: int = 10000,
     random_seed: int = 44,
-) -> pd.DataFrame:
+) -> [list, list, list]:
+    """
+    Extract a list of distances.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+
+    ptm_target : str
+        String specifying the PTM type for which you want to evaluate if it
+        is in colocalizing with the background.
+    ptm_background : str
+        String specifying the PTM type that is used as background.
+    ptm_dict : dict
+        Dictionary containing the possible amino acid sites for each PTM.
+    error_dir : str
+        Path to the directory where the hdf files containing the matrices of
+        paired aligned errors of AlphaFold are stored.
+    filename_format : str
+        The file name of the pae files saved by download_alphafold_pae.
+        The brackets {} are replaced by a protein name from the proteins list.
+        Default is 'pae_{}.hdf'.
+    n_random : int
+        Number of random permutations to perform. Default is 10'000.
+        The higher the number of permutations, the more confidence the analysis
+        can achieve. However, a very high number of permutations increases
+        processing time. No fewer than 1'000 permutations should be used.
+    random_seed : int
+        Random seed for the analysis. Default is 44.
+
+    Returns
+    -------
+    : [list, list, list]
+        List of 3D distances, list of 1D distances and
+        list of modified indices.
+    """
     random.seed(random_seed)
     prot_distances = list()
     prot_distances_1D = list()
@@ -1458,11 +1517,32 @@ def get_distance_list(
 
 
 def get_mod_ptm_fraction(
-    distances,
-    mod_idx,
-    min_dist,
-    max_dist
+    distances: list,
+    mod_idx: list,
+    min_dist: int,
+    max_dist: int
 ) -> float:
+    """
+    Calculate the fraction of modified PTM acceptor residues within
+    a distance range.
+
+    Parameters
+    ----------
+    distances: list
+        List of 1D or 3D distances.
+    mod_idx: lists
+        List of indices to select which distances to consider.
+    min_dist: int
+        Minimum distance of the bin.
+    max_dist: int
+        Maximum distance of the bin.
+
+    Returns
+    -------
+    : float
+        Fraction of modified PTM acceptor residues within
+        the provided distance range.
+    """
     n_aa = [0]*len(distances[0])
     n_aa_mod = [0]*len(distances[0])
     for idx, p in enumerate(distances):
@@ -1483,12 +1563,58 @@ def evaluate_ptm_colocalization(
     ptm_types: list,
     ptm_dict: dict,
     pae_dir: str,
-    n_random=5,
-    random_seed=44,
-    min_dist=-0.01,
-    max_dist=35,
-    dist_step=5
+    filename_format: str = "pae_{}.hdf",
+    n_random: int = 5,
+    random_seed: int = 44,
+    min_dist: float = -0.01,
+    max_dist: float = 35,
+    dist_step: float = 5
 ) -> pd.DataFrame:
+    """
+    Extract a list of distances.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Dataframe with AlphaFold annotations.
+    ptm_target : str
+        String specifying the PTM type for which you want to evaluate if it
+        is in colocalizing with the background.
+    ptm_types : list of strings
+        List of strings specifying the PTM types that should be used as
+        background.
+    ptm_dict : dict
+        Dictionary containing the possible amino acid sites for each PTM.
+    pae_dir : str
+        Path to the directory where the hdf files containing the matrices of
+        paired aligned errors of AlphaFold are stored.
+    filename_format : str
+        The file name of the pae files saved by download_alphafold_pae.
+        The brackets {} are replaced by a protein name from the proteins list.
+        Default is 'pae_{}.hdf'.
+    n_random : int
+        Number of random permutations to perform. Default is 10'000.
+        The higher the number of permutations, the more confidence the analysis
+        can achieve. However, a very high number of permutations increases
+        processing time. No fewer than 1'000 permutations should be used.
+    random_seed : int
+        Random seed for the analysis. Default is 44.
+    min_dist : float
+        Minimum distance to consider.
+        Default is -0.01.
+    max_dist : float
+        Maximum distance to consider.
+        Default is 35.
+    dist_step : float
+        Stepsize for distance bins between min_dist and max_dist.
+        Default is 5.
+
+    Returns
+    -------
+    : pd.DataFrame
+        Dataframe with following columns: 'context', 'ptm_types', 'cutoff',
+        'std_random_fraction', 'variable', 'value'
+    """
     distance_cutoffs = np.arange(min_dist, max_dist, dist_step)
     cutoff_list = list()
     ptm_list = list()
@@ -1507,6 +1633,7 @@ def evaluate_ptm_colocalization(
             ptm_background=ptm_type,
             ptm_dict=ptm_dict,
             error_dir=pae_dir,
+            filename_format=filename_format,
             n_random=n_random,
             random_seed=random_seed
         )
@@ -1514,14 +1641,16 @@ def evaluate_ptm_colocalization(
             ptm_list.append(ptm_type)
             cutoff_list.append(dist_cut+dist_step)
             mod_fraction_3D = get_mod_ptm_fraction(
-                distances_3D, mod_idx,
+                distances_3D,
+                mod_idx,
                 min_dist=dist_cut,
                 max_dist=dist_cut+dist_step)
             real_fraction_3D.append(mod_fraction_3D[0])
             mean_random_fraction_3D.append(np.mean(mod_fraction_3D[1:]))
             std_random_fraction_3D.append(np.std(mod_fraction_3D[1:]))
             mod_fraction_1D = get_mod_ptm_fraction(
-                distances_1D, mod_idx,
+                distances_1D,
+                mod_idx,
                 min_dist=dist_cut,
                 max_dist=dist_cut+dist_step)
             real_fraction_1D.append(mod_fraction_1D[0])
