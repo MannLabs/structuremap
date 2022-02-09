@@ -1356,6 +1356,7 @@ def get_extended_flexible_pattern(
     return df_out
 
 
+#  This function could be numba compatible
 def calculate_distances_between_ptms(
     background_idx_list: list,
     target_aa_idx: np.ndarray,
@@ -1517,6 +1518,7 @@ def get_ptm_distance_list(
     return prot_distances, prot_distances_1D, prot_mod_idx
 
 
+#  This function could be numba compatible
 def get_mod_ptm_fraction(
     distances: list,
     mod_idx: list,
@@ -1550,9 +1552,9 @@ def get_mod_ptm_fraction(
         rand_count = 0
         for rand in p:
             for back in rand:
-                n_aa[rand_count] += len([i for i in back if ((i>min_dist) & (i<=max_dist))])
+                n_aa[rand_count] += len([i for i in back if ((i > min_dist) & (i <= max_dist))])
                 mod_back = [back[i] for i in mod_idx[idx]]
-                n_aa_mod[rand_count] += len([i for i in mod_back if ((i>min_dist) & (i<=max_dist))])
+                n_aa_mod[rand_count] += len([i for i in mod_back if ((i > min_dist) & (i <= max_dist))])
             rand_count += 1
     mod_fraction = [mod/aa if aa>0 else np.nan for aa,mod in zip(n_aa, n_aa_mod)]
     return mod_fraction
@@ -1585,7 +1587,8 @@ def evaluate_ptm_colocalization(
         is in colocalizing with the background.
     ptm_types : list of strings
         List of strings specifying the PTM types that should be used as
-        background.
+        background. If "self" is included, this means that the ptm_target
+        is used also as backround modification.
     ptm_dict : dict
         Dictionary containing the possible amino acid sites for each PTM.
     pae_dir : str
@@ -1604,7 +1607,7 @@ def evaluate_ptm_colocalization(
         Random seed for the analysis. Default is 44.
     min_dist : float
         Minimum distance to consider.
-        Default is -0.01.
+        Default is 0, meaning that the target amino acid is included itself.
     max_dist : float
         Maximum distance to consider.
         Default is 35.
@@ -1619,6 +1622,7 @@ def evaluate_ptm_colocalization(
         'std_random_fraction', 'variable', 'value'
     """
     distance_cutoffs = np.arange(min_dist, max_dist, dist_step)
+    # might want to change to np.linspace above
     cutoff_list = list()
     ptm_list = list()
     real_fraction_3D = list()
@@ -1640,13 +1644,19 @@ def evaluate_ptm_colocalization(
             n_random=n_random,
             random_seed=random_seed
         )
+        dist_i = 0
         for dist_cut in distance_cutoffs:
             ptm_list.append(ptm_type)
             cutoff_list.append(dist_cut+dist_step)
+            if dist_i == 0:
+                # make sure that the minimum is incuded
+                dist_step_mod = 0.001
+            else:
+                dist_step_mod = 0
             mod_fraction_3D = get_mod_ptm_fraction(
                 distances_3D,
                 mod_idx,
-                min_dist=dist_cut,
+                min_dist=dist_cut-dist_step_mod,
                 max_dist=dist_cut+dist_step)
             real_fraction_3D.append(mod_fraction_3D[0])
             mean_random_fraction_3D.append(np.mean(mod_fraction_3D[1:]))
@@ -1654,11 +1664,12 @@ def evaluate_ptm_colocalization(
             mod_fraction_1D = get_mod_ptm_fraction(
                 distances_1D,
                 mod_idx,
-                min_dist=dist_cut,
+                min_dist=dist_cut-dist_step_mod,
                 max_dist=dist_cut+dist_step)
             real_fraction_1D.append(mod_fraction_1D[0])
             mean_random_fraction_1D.append(np.mean(mod_fraction_1D[1:]))
             std_random_fraction_1D.append(np.std(mod_fraction_1D[1:]))
+            dist_i += 1
     res_df_3D = pd.DataFrame({
         'context': np.repeat('3D', len(cutoff_list)),
         'cutoff': cutoff_list,

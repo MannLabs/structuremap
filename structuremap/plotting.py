@@ -201,6 +201,7 @@ def plot_ptm_colocalization(
             facet_col="ptm_types",
             facet_col_spacing=0.05,
             labels={"value": "Fraction of modified acceptors",
+                    "cutoff": "distance bin",
                     "ptm_types": "",
                     "variable": ""},
             color_discrete_sequence=['rgb(177, 63, 100)', 'grey'])
@@ -219,6 +220,7 @@ def plot_ptm_colocalization(
             facet_row="ptm_types",
             facet_col="context",
             labels={"value": "Fraction of modified acceptors",
+                    "cutoff": "distance bin",
                     "ptm_types": "",
                     "variable": ""},
             color_discrete_sequence=['rgb(177, 63, 100)', 'grey'])
