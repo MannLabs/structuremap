@@ -55,10 +55,10 @@ def plot_enrichment(
     data : pd.DataFrame
         Dataframe with enrichment results
         from structuremap.processing.perform_enrichment_analysis.
-    ptm_select: list
+    ptm_select : list
         List of PTMs to show.
         Default is None, which shows all PTMs in data.
-    roi_select: list
+    roi_select : list
         List of regions of interest (ROIs) to show.
         Default is None, which shows all ROIs in data.
 
@@ -132,10 +132,10 @@ def plot_ptm_colocalization(
     df : pd.DataFrame
         Dataframe with results from
         structuremap.processing.evaluate_ptm_colocalization.
-    name: str
+    name : str
         Name of the resulting plot.
         Default is 'Fraction of modified acceptor residues'.
-    context: str
+    context : str
         Either '3D', '1D' or None.
         Default is None, which shows both 1D and 3D results.
 
