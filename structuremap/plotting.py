@@ -11,25 +11,28 @@ import numpy as np
 
 
 def scale_pvals(
-    x: Union[list, np.array],
+    pvals: Union[list, np.array],
 ) -> list:
     """
     Function to scale p-values that are already negative log10 transformed.
+    In this context, scaling refers to assigning the p-values to a specific
+    significance bin. The resulting significance bins are formatted as string
+    for plotting purposes.
 
     Parameters
     ----------
-    x : list or np.array of integers
+    pvals : list or np.array of integers
         List (or any other iterable) of p-values that are already
         negative log10 transformed.
 
     Returns
     -------
     : list
-        The lists of negative log10 transformed p-value bins.
+        The lists of significance bins as strings.
     """
     steps = [1000, 100, 50, 10, 5, 2]
     r = []
-    for xi in x:
+    for xi in pvals:
         s_max = 0
         for s in steps:
             if xi >= s:
@@ -50,7 +53,8 @@ def plot_enrichment(
     Parameters
     ----------
     data : pd.DataFrame
-        Dataframe with enrichment results from perform_enrichment_analysis.
+        Dataframe with enrichment results
+        from structuremap.processing.perform_enrichment_analysis.
     ptm_select: list
         List of PTMs to show.
         Default is None, which shows all PTMs in data.
@@ -66,11 +70,11 @@ def plot_enrichment(
     df = data.copy(deep=True)
     df['ptm'] = [re.sub('_', ' ', p) for p in df['ptm']]
     category_dict = {}
-    if ptm_select:
+    if ptm_select is None:
         ptm_select = [re.sub('_', ' ', p) for p in ptm_select]
         df = df[df.ptm.isin(ptm_select)]
         category_dict['ptm'] = ptm_select
-    if roi_select:
+    if roi_select is None:
         df = df[df.roi.isin(roi_select)]
         category_dict['roi'] = roi_select
     df['log_odds_ratio'] = np.log(df['oddsr'])
@@ -126,7 +130,8 @@ def plot_ptm_colocalization(
     Parameters
     ----------
     df : pd.DataFrame
-        Dataframe with results from evaluate_ptm_colocalization(.
+        Dataframe with results from
+        structuremap.processing.evaluate_ptm_colocalization.
     name: str
         Name of the resulting plot.
         Default is 'Fraction of modified acceptor residues'.
@@ -159,7 +164,7 @@ def plot_ptm_colocalization(
         fig = fig.update_yaxes(matches=None, showticklabels=True, col=3)
         fig = fig.update_yaxes(matches=None, showticklabels=True, col=4)
         fig = fig.update_yaxes(matches=None, showticklabels=True, col=5)
-    else:
+    elif context is None:
         fig = px.scatter(
             df,
             x="cutoff",
@@ -174,6 +179,8 @@ def plot_ptm_colocalization(
             color_discrete_sequence=['rgb(177, 63, 100)', 'grey'])
         fig = fig.update_layout(width=1000, height=1800)
         fig = fig.update_yaxes(matches=None)
+    else:
+        raise ValueError("f{context} is not a valid context")
     fig = fig.update_layout(title=name,
                             template="simple_white")
     config = {'toImageButtonOptions': {'format': 'svg', 'filename': name}}
