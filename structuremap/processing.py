@@ -1482,13 +1482,15 @@ def get_ptm_distance_list(
         # amino acid residues of background PTM
         background_aa = ptm_dict[ptm_background]
         # indices of background_aa
-        background_idx = df_prot[df_prot.AA.isin(background_aa)].index.tolist()
+        background_idx = list(np.flatnonzero(df_prot.AA.isin(background_aa)))
         # number of observed background modifications
         n_aa_background_mod = np.sum(df_prot[ptm_background] == 1)
         if n_aa_background_mod >= 1:
             # indices of observed background PTMs
             real_background_idx = df_prot.index[df_prot[ptm_background] == 1].tolist()
             # list of random index lists for background PTMs
+            # @TODO: probably slowish due to making lists of 10000 elements,
+            # perhaps this can be avoided
             background_idx_list = [random.sample(
                 background_idx,
                 len(real_background_idx)) for i in np.arange(0, n_random)]
@@ -1498,7 +1500,7 @@ def get_ptm_distance_list(
             # amino acid residues of target PTM
             target_aa = ptm_dict[ptm_target]
             # indices of target_aa
-            target_aa_idx = df_prot[df_prot.AA.isin(target_aa)].index.tolist()
+            target_aa_idx = list(np.flatnonzero(df_prot.AA.isin(target_aa)))
             # indices of observed target PTMs
             target_mod_idx = df_prot.index[df_prot[ptm_target] == 1].tolist()
             # index of observed PTMs within index list of all target_aa
