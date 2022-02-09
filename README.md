@@ -6,17 +6,14 @@
 
 
 # structuremap
-An open-source Python package of the AlphaPept ecosystem from the [Mann Labs at the Max Planck Institute of Biochemistry](https://www.biochem.mpg.de/mann) and the [University of Copenhagen](https://www.cpr.ku.dk/research/proteomics/mann/). To enable all hyperlinks in this document, please view it at [GitHub](https://github.com/MannLabs/structuremap).
+An open-source Python package for integrating information from predicted protein structures deposited in the [AlphaFold database](https://alphafold.ebi.ac.uk/) with proteomics data and specifically with post-translational modifications (PTMs). PTMs on the 3D protein structures can be visulaized by [AlphaMap](https://github.com/MannLabs/alphamap). To enable all hyperlinks in this document, please view it at [GitHub](https://github.com/MannLabs/structuremap).
 
 * [**About**](#about)
 * [**License**](#license)
 * [**Installation**](#installation)
-  * [**One-click GUI**](#one-click-gui)
   * [**Pip installer**](#pip)
   * [**Developer installer**](#developer)
 * [**Usage**](#usage)
-  * [**GUI**](#gui)
-  * [**CLI**](#cli)
   * [**Python and jupyter notebooks**](#python-and-jupyter-notebooks)
 * [**Troubleshooting**](#troubleshooting)
 * [**Citations**](#citations)
@@ -26,7 +23,7 @@ An open-source Python package of the AlphaPept ecosystem from the [Mann Labs at 
 ---
 ## About
 
-An open-source Python package of the AlphaPept ecosystem from the [Mann Labs at the Max Planck Institute of Biochemistry](https://www.biochem.mpg.de/mann) and the [University of Copenhagen](https://www.cpr.ku.dk/research/proteomics/mann/).
+An open-source Python package for integrating information from predicted protein structures deposited in the [AlphaFold database](https://alphafold.ebi.ac.uk/) with proteomics data and specifically with post-translational modifications (PTMs). PTMs on 3D protein structures can be visulaized by [AlphaMap](https://github.com/MannLabs/alphamap).
 
 ---
 ## License
@@ -37,21 +34,10 @@ structuremap was developed by the [Mann Labs at the Max Planck Institute of Bioc
 ## Installation
 
 structuremap can be installed and used on all major operating systems (Windows, macOS and Linux).
-There are three different types of installation possible:
+There are two different types of installation possible:
 
-* [**One-click GUI installer:**](#one-click-gui) Choose this installation if you only want the GUI and/or keep things as simple as possible.
 * [**Pip installer:**](#pip) Choose this installation if you want to use structuremap as a Python package in an existing Python 3.8 environment (e.g. a Jupyter notebook). If needed, the GUI and CLI can be installed with pip as well.
 * [**Developer installer:**](#developer) Choose this installation if you are familiar with CLI tools, [conda](https://docs.conda.io/en/latest/) and Python. This installation allows access to all available features of structuremap and even allows to modify its source code directly. Generally, the developer version of structuremap outperforms the precompiled versions which makes this the installation of choice for high-throughput experiments.
-
-### One-click GUI
-
-The GUI of structuremap is a completely stand-alone tool that requires no knowledge of Python or CLI tools. Click on one of the links below to download the latest release for:
-
-* [**Windows**](https://github.com/MannLabs/structuremap/releases/latest/download/structuremap_gui_installer_windows.exe)
-* [**macOS**](https://github.com/MannLabs/structuremap/releases/latest/download/structuremap_gui_installer_macos.pkg)
-* [**Linux**](https://github.com/MannLabs/structuremap/releases/latest/download/structuremap_gui_installer_linux.deb)
-
-Older releases remain available on the [release page](https://github.com/MannLabs/structuremap/releases), but no backwards compatibility is guaranteed.
 
 ### Pip
 
@@ -112,34 +98,6 @@ By default this installs loose dependancies (no explicit versioning), although i
 ---
 ## Usage
 
-There are three ways to use structuremap:
-
-* [**GUI**](#gui)
-* [**CLI**](#cli)
-* [**Python**](#python-and-jupyter-notebooks)
-
-NOTE: The first time you use a fresh installation of structuremap, it is often quite slow because some functions might still need compilation on your local operating system and architecture. Subsequent use should be a lot faster.
-
-### GUI
-
-If the GUI was not installed through a one-click GUI installer, it can be activate with the following `bash` command:
-
-```bash
-structuremap gui
-```
-
-Note that this needs to be prepended with a `!` when you want to run this from within a Jupyter notebook. When the command is run directly from the command-line, make sure you use the right environment (activate it with e.g. `conda activate structuremap` or set an alias to the binary executable (can be obtained with `where structuremap` or `which structuremap`)).
-
-### CLI
-
-The CLI can be run with the following command (after activating the `conda` environment with `conda activate structuremap` or if an alias was set to the structuremap executable):
-
-```bash
-structuremap -h
-```
-
-It is possible to get help about each function and their (required) parameters by using the `-h` flag.
-
 ### Python and Jupyter notebooks
 
 structuremap can be imported as a Python package into any Python script or notebook with the command `import structuremap`.
@@ -157,7 +115,7 @@ In case of issues, check out the following:
 ---
 ## Citations
 
-There are currently no plans to draft a manuscript.
+A manuscript is currently in preparation. 
 
 ---
 ## How to contribute
