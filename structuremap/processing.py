@@ -35,7 +35,8 @@ def download_alphafold_cif(
     Parameters
     ----------
     proteins : list
-        List (or any other iterable) of UniProt protein accessions for which to download the structures.
+        List (or any other iterable) of UniProt protein accessions for which to
+        download the structures.
     out_folder : str
         Path to the output folder.
     alphafold_cif_url : str
@@ -91,12 +92,14 @@ def download_alphafold_pae(
     verbose_log: bool = False,
 ) -> tuple:
     """
-    Function to download paired aligned errors (pae) for protein structures predicted by AlphaFold.
+    Function to download paired aligned errors (pae) for protein structures
+    predicted by AlphaFold.
 
     Parameters
     ----------
     proteins : list
-        List (or any other iterable) of UniProt protein accessions for which to download the structures.
+        List (or any other iterable) of UniProt protein accessions for which to
+        download the structures.
     out_folder : str
         Path to the output folder.
     out_format : str
@@ -196,7 +199,7 @@ def format_alphafold_data(
 
             protein_id = re.sub(r'.cif', '', file)
 
-            if ((protein_id in protein_ids) or (len(protein_ids)==0)):
+            if ((protein_id in protein_ids) or (len(protein_ids) == 0)):
 
                 protein_number += 1
 
@@ -244,10 +247,11 @@ def format_alphafold_data(
 
                     for i in np.arange(0, len(start_idx)):
                         df['secondary_structure'] = np.where(
-                            df['position'].between(start_idx[i],
-                                                   end_idx[i]),
-                                                   note[i],
-                                                   df['secondary_structure'])
+                            df['position'].between(
+                                start_idx[i],
+                                end_idx[i]),
+                            note[i],
+                            df['secondary_structure'])
 
                 alphafold_annotation_l.append(df)
 
@@ -255,7 +259,9 @@ def format_alphafold_data(
     alphafold_annotation = alphafold_annotation.sort_values(
         by=['protein_number', 'position']).reset_index(drop=True)
 
-    alphafold_annotation['structure_group'] = [re.sub('_.*', '', i) for i in alphafold_annotation['secondary_structure']]
+    alphafold_annotation['structure_group'] = [re.sub('_.*', '', i)
+                                               for i in alphafold_annotation[
+                                               'secondary_structure']]
     str_oh = pd.get_dummies(alphafold_annotation['structure_group'],
                             dtype='int64')
     alphafold_annotation = alphafold_annotation.join(str_oh)
@@ -336,9 +342,10 @@ def rotate_vector_around_axis(
     b, c, d = -axis * np.sin(theta / 2.0)
     aa, bb, cc, dd = a * a, b * b, c * c, d * d
     bc, ad, ac, ab, bd, cd = b * c, a * d, a * c, a * b, b * d, c * d
-    rotation_matrix = np.array([[aa + bb - cc - dd, 2 * (bc + ad), 2 * (bd - ac)],
-                                [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab)],
-                                [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc]])
+    rotation_matrix = np.array(
+        [[aa + bb - cc - dd, 2 * (bc + ad), 2 * (bd - ac)],
+         [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab)],
+         [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc]])
     rotated_vector = np.dot(rotation_matrix, vector)
     return rotated_vector
 
@@ -360,11 +367,14 @@ def get_gly_vector(
     Parameters
     ----------
     coord_a : np.ndarray
-        Array of 3D coordinates of alpha carbon atoms across different amino acids.
+        Array of 3D coordinates of alpha carbon atoms across different
+        amino acids.
     coord_c : np.ndarray
-        Array of 3D coordinates of carboxy carbon atoms across different amino acids.
+        Array of 3D coordinates of carboxy carbon atoms across different
+        amino acids.
     coord_n : np.ndarray
-        Array of 3D coordinates of amino nitrogen atoms across different amino acids.
+        Array of 3D coordinates of amino nitrogen atoms across different
+        amino acids.
     idx_1 : int
         Integer to select a specific amino acid in the coordinate arrays.
     theta : float
@@ -401,13 +411,17 @@ def get_angle(
     Parameters
     ----------
     coord_a : np.ndarray
-        Array of 3D coordinates of alpha carbon atoms across different amino acids.
+        Array of 3D coordinates of alpha carbon atoms across different
+        amino acids.
     coord_b : np.ndarray
-        Array of 3D coordinates of beta carbon atoms across different amino acids.
+        Array of 3D coordinates of beta carbon atoms across different
+        amino acids.
     coord_c : np.ndarray
-        Array of 3D coordinates of carboxy carbon atoms across different amino acids.
+        Array of 3D coordinates of carboxy carbon atoms across different
+        amino acids.
     coord_n : np.ndarray
-        Array of 3D coordinates of amino nitrogen atoms across different amino acids.
+        Array of 3D coordinates of amino nitrogen atoms across different
+        amino acids.
     idx_1 : int
         Integer to select a first amino acid in the coordinate arrays.
     idx_2 : int
@@ -416,7 +430,8 @@ def get_angle(
     Returns
     -------
     : float
-        Angle between the side chain of the first amino acid and a second amino acid.
+        Angle between the side chain of the first amino acid and a second
+        amino acid.
     """
     if np.isnan(coord_b[idx_1, 0]):
         # Get pseudo vector Ca -> Cb for a Gly residue.
@@ -437,6 +452,7 @@ def get_angle(
     angle_deg = np.rad2deg(angle)
     return(angle_deg)
 
+
 @numba.njit
 def get_paired_error(
     position: np.ndarray,
@@ -452,7 +468,7 @@ def get_paired_error(
     ----------
     position : np.ndarray
         Array of amino acid positions from which to choose specific indeces.
-    error_dist: : np.ndarray
+    error_dist : np.ndarray
         Matrix of paired aligned errors of AlphaFold across all amino acids
         in a protein qequence.
     idx_1 : int
@@ -492,21 +508,27 @@ def get_neighbors(
     idx_list : np.ndarray
         Array of amino acid indeces.
     coord_a : np.ndarray
-        Array of 3D coordinates of alpha carbon atoms across different amino acids.
+        Array of 3D coordinates of alpha carbon atoms across different
+        amino acids.
     coord_b : np.ndarray
-        Array of 3D coordinates of beta carbon atoms across different amino acids.
+        Array of 3D coordinates of beta carbon atoms across different
+        amino acids.
     coord_c : np.ndarray
-        Array of 3D coordinates of carboxy carbon atoms across different amino acids.
+        Array of 3D coordinates of carboxy carbon atoms across different
+        amino acids.
     coord_n : np.ndarray
-        Array of 3D coordinates of amino nitrogen atoms across different amino acids.
+        Array of 3D coordinates of amino nitrogen atoms across different
+        amino acids.
     position : np.ndarray
         Array of amino acid positions.
     error_dist: : np.ndarray
-        Matrix of paired aligned errors of AlphaFold across all amino acids in a protein qequence.
+        Matrix of paired aligned errors of AlphaFold across all amino acids
+        in a protein qequence.
     max_dist : float
         Float specifying the maximum distance between two amino acids.
     max_angle : float
-        Float specifying the maximum angle (in degrees) between two amino acids.
+        Float specifying the maximum angle (in degrees) between two
+        amino acids.
 
     Returns
     -------
@@ -581,7 +603,8 @@ def partition_df_by_prots(
     """
     Generator function to split a dataframe into seperate proteins.
 
-    NOTE: This function is significantly faster if the input df is already sorted by protein_number!
+    NOTE: This function is significantly faster if the input df is already
+    sorted by protein_number!
 
     Parameters
     ----------
@@ -615,7 +638,8 @@ def annotate_accessibility(
     filename_format: str = "pae_{}.hdf",
 ) -> pd.DataFrame:
     """
-    Half sphere exposure as calculated in https://onlinelibrary.wiley.com/doi/10.1002/prot.20379
+    Half sphere exposure as calculated in
+    https://onlinelibrary.wiley.com/doi/10.1002/prot.20379
     but with paired aligned error metric included.
 
     Parameters
@@ -626,7 +650,8 @@ def annotate_accessibility(
     max_dist : float
         Float specifying the maximum distance between two amino acids.
     max_angle : float
-        Float specifying the maximum angle (in degrees) between two amino acids.
+        Float specifying the maximum angle (in degrees) between two
+        amino acids.
     error_dir: : str
         Path to the directory where the hdf files containing the matrices of
         paired aligned errors of AlphaFold are stored. This should correspond
@@ -639,8 +664,9 @@ def annotate_accessibility(
     Returns
     -------
     : pd.DataFrame
-        Dataframe repporting the number of neighboring amino acids at the specified
-        maximum distance and angle per protein, amino acid and position.
+        Dataframe repporting the number of neighboring amino acids at the
+        specified maximum distance and angle per protein, amino acid and
+        position.
     """
     proteins = list()
     AA = list()
@@ -651,7 +677,8 @@ def annotate_accessibility(
         if error_dir is not None:
             with h5py.File(os.path.join(
                 error_dir,
-                filename_format.format(protein_accession))) as hdf_root:
+                filename_format.format(protein_accession))
+            ) as hdf_root:
                 error_dist = hdf_root['dist'][...]
             size = int(np.sqrt(len(error_dist)))
             error_dist = error_dist.reshape(size, size)
@@ -694,7 +721,8 @@ def annotate_accessibility(
     AA = np.concatenate(AA)
     AA_p = np.concatenate(AA_p)
     a_AA = np.concatenate(a_AA)
-    accessibility_df = pd.DataFrame({'protein_id': proteins, 'AA': AA, 'position': AA_p})
+    accessibility_df = pd.DataFrame({'protein_id': proteins,
+                                     'AA': AA, 'position': AA_p})
     accessibility_df[f'nAA_{max_dist}_{max_angle}_{use_pae}'] = a_AA
     return(accessibility_df)
 
@@ -704,17 +732,17 @@ def smooth_score(score: np.ndarray,
                  half_window: int
                  ) -> np.ndarray:
     """
-    Get an average value for each position in a score array, considering all values
-    within a window that spans up to half_window positions before and after a given
-    target position.
+    Get an average value for each position in a score array, considering all
+    values within a window that spans up to half_window positions before and
+    after a given target position.
 
     Parameters
     ----------
     score : np.ndarray
         Array of numeric score values.
     half_window : int
-        Integer specifying the number of positions to consider both before and after
-        a given target position.
+        Integer specifying the number of positions to consider both before and
+        after a given target position.
 
     Returns
     -------
@@ -740,7 +768,8 @@ def get_smooth_score(df: pd.DataFrame,
                      half_windows: list,
                      ) -> pd.DataFrame:
     """
-    Select columns in a dataframe and smooth the values per protein based on a provided window.
+    Select columns in a dataframe and smooth the values per protein based on a
+    provided window.
 
     Parameters
     ----------
@@ -756,7 +785,8 @@ def get_smooth_score(df: pd.DataFrame,
     Returns
     -------
     : pd.DataFrame
-        Copy of the input dataframe with additional columns containing the smoothed scores.
+        Copy of the input dataframe with additional columns containing the
+        smoothed scores.
     """
     df_out = []
     for df_prot in partition_df_by_prots(df):
@@ -787,11 +817,13 @@ def get_avg_3d_dist(idx_list: np.ndarray,  # as before, technically not a list b
     idx_list : np.ndarray
         Array of amino acid indeces.
     coord: np.ndarray
-        Array of 3D coordinates of alpha carbon atoms across different amino acids.
+        Array of 3D coordinates of alpha carbon atoms across different
+        amino acids.
     position : np.ndarray
         Array of amino acid positions.
     error_dist: : np.ndarray
-        Matrix of paired aligned errors of AlphaFold across all amino acids in a protein qequence.
+        Matrix of paired aligned errors of AlphaFold across all amino acids in
+        a protein qequence.
     metric : str
         Metric to aggregate distances across all pairs for a given amino acid.
         'mean' or 'min' can be chosen. Default is 'mean'.
@@ -839,7 +871,8 @@ def get_avg_3d_dist(idx_list: np.ndarray,  # as before, technically not a list b
                         all_dist.append(nAA_dist)
                     else:
                         all_dist.append(dist_error_i)
-        # Probably the 5 lines below can be optimized, but likely not worth the speed improvement?
+        # Probably the 5 lines below can be optimized, but likely not worth
+        # the speed improvement?
         all_dist_d = np.array(all_dist)
         if metric == 'mean':
             m_d = np.mean(all_dist_d)
@@ -939,7 +972,8 @@ def get_proximity_pvals(df: pd.DataFrame,
     Returns
     -------
     : pd.DataFrame
-        Dataframe reporting 3D and 1D proximity p-values for each protein and selected PTM.
+        Dataframe reporting 3D and 1D proximity p-values for each protein and
+        selected PTM.
     """
     random.seed(random_seed)
     proteins = list()
@@ -979,7 +1013,8 @@ def get_proximity_pvals(df: pd.DataFrame,
                     position=df_ptm_prot["position"].values,
                     metric=per_site_metric)
                 # get background distribution
-                rand_idx_list = [np.array(random.sample(range(n_aa_all), len(real_idx))) for i in range(n_random)]
+                rand_idx_list = [np.array(random.sample(
+                    range(n_aa_all), len(real_idx))) for i in range(n_random)]
                 rand_avg_dist_3d = [get_avg_3d_dist(
                     idx_list=idx_l,
                     coord=np.vstack([
@@ -997,8 +1032,10 @@ def get_proximity_pvals(df: pd.DataFrame,
                 # get empirical p-values
                 pvalue_3d = np.sum(np.array(rand_avg_dist_3d) <= avg_dist_3d)/n_random
                 pvalue_1d = np.sum(np.array(rand_avg_dist_1d) <= avg_dist_1d)/n_random
-                # If this is a slow step, there are several ways to still optimize this I think.
-                # Especially the creation of 10000 elements in both a list and array seem concerning to me.
+                # If this is a slow step, there are several ways to still
+                # optimize this I think.
+                # Especially the creation of 10000 elements in both a list and
+                # array seem concerning to me.
                 # Probably a >> 10 fold is still possible here.
             else:
                 pvalue_3d = np.nan
@@ -1008,7 +1045,11 @@ def get_proximity_pvals(df: pd.DataFrame,
             n_ptms.append(n_aa_mod)
             proteins.append(protein_accession)
             ptm_type.append(ptm_i)
-    res_df = pd.DataFrame({'protein_id': proteins, 'ptm': ptm_type, 'n_ptms': n_ptms, 'pvalue_1d': pvals_1d, 'pvalue_3d': pvals_3d})
+    res_df = pd.DataFrame({'protein_id': proteins,
+                           'ptm': ptm_type,
+                           'n_ptms': n_ptms,
+                           'pvalue_1d': pvals_1d,
+                           'pvalue_3d': pvals_3d})
     res_df_noNan = res_df.dropna(subset=['pvalue_3d','pvalue_1d']).reset_index(drop=True)
     # Why are these then stored explicitly above? # This was to know which IDs these are.
     res_df_noNan['pvalue_1d_adj_bh'] = statsmodels.stats.multitest.multipletests(pvals=res_df_noNan.pvalue_1d, alpha=0.1, method='fdr_bh')[1]
@@ -1045,8 +1086,8 @@ def perform_enrichment_analysis(df: pd.DataFrame,
     Returns
     -------
     : pd.DataFrame
-        Dataframe reporting p-values for the enrichment of all selected ptm_types
-        across selected rois.
+        Dataframe reporting p-values for the enrichment of all selected
+        ptm_types across selected rois.
     """
 
     enrichment = []
@@ -1066,32 +1107,36 @@ def perform_enrichment_analysis(df: pd.DataFrame,
                 n_naked_in_roi = seq_ann_qcut_aa[seq_ann_qcut_aa_roi1 & seq_ann_qcut_aa_ptm0].shape[0]
                 n_naked_not_in_roi = seq_ann_qcut_aa[seq_ann_qcut_aa_roi0 & seq_ann_qcut_aa_ptm0].shape[0]
                 fisher_table = np.array([[n_ptm_in_roi, n_naked_in_roi], [n_ptm_not_in_roi, n_naked_not_in_roi]])
-                oddsr, p = scipy.stats.fisher_exact(fisher_table, alternative='two-sided')
+                oddsr, p = scipy.stats.fisher_exact(fisher_table,
+                                                    alternative='two-sided')
                 res = pd.DataFrame({'quality_cutoff': [q_cut],
-                                   'ptm': [ptm],
-                                   'roi': [roi],
-                                   'n_aa_ptm':  np.sum(seq_ann_qcut_aa_ptm1),
-                                   'n_aa_roi':  np.sum(seq_ann_qcut_aa_roi1),
-                                   'n_ptm_in_roi': n_ptm_in_roi,
-                                   'n_ptm_not_in_roi': n_ptm_not_in_roi,
-                                   'n_naked_in_roi': n_naked_in_roi,
-                                   'n_naked_not_in_roi': n_naked_not_in_roi,
-                                   'oddsr': [oddsr],
-                                   'p': [p]})
+                                    'ptm': [ptm],
+                                    'roi': [roi],
+                                    'n_aa_ptm':  np.sum(seq_ann_qcut_aa_ptm1),
+                                    'n_aa_roi':  np.sum(seq_ann_qcut_aa_roi1),
+                                    'n_ptm_in_roi': n_ptm_in_roi,
+                                    'n_ptm_not_in_roi': n_ptm_not_in_roi,
+                                    'n_naked_in_roi': n_naked_in_roi,
+                                    'n_naked_not_in_roi': n_naked_not_in_roi,
+                                    'oddsr': [oddsr],
+                                    'p': [p]})
                 enrichment.append(res)
     enrichment_df = pd.concat(enrichment)
     if multiple_testing:
-        enrichment_df['p_adj_bf'] = statsmodels.stats.multitest.multipletests(pvals=enrichment_df.p, alpha=0.01, method='bonferroni')[1]
-        enrichment_df['p_adj_bh'] = statsmodels.stats.multitest.multipletests(pvals=enrichment_df.p, alpha=0.01, method='fdr_bh')[1]
+        enrichment_df['p_adj_bf'] = statsmodels.stats.multitest.multipletests(
+            pvals=enrichment_df.p, alpha=0.01, method='bonferroni')[1]
+        enrichment_df['p_adj_bh'] = statsmodels.stats.multitest.multipletests(
+            pvals=enrichment_df.p, alpha=0.01, method='fdr_bh')[1]
     return(enrichment_df)
 
 
-def perform_enrichment_analysis_per_protein(df: pd.DataFrame,
-                                            ptm_types: list,
-                                            rois: list,
-                                            quality_cutoffs: list,
-                                            ptm_site_dict: dict) -> pd.DataFrame:
-
+def perform_enrichment_analysis_per_protein(
+    df: pd.DataFrame,
+    ptm_types: list,
+    rois: list,
+    quality_cutoffs: list,
+    ptm_site_dict: dict
+) -> pd.DataFrame:
     """
     Get per protein enrichment p-values for selected PTMs acros regions of
     interest (ROIs).
@@ -1113,8 +1158,8 @@ def perform_enrichment_analysis_per_protein(df: pd.DataFrame,
     Returns
     -------
     : pd.DataFrame
-        Dataframe reporting p-values for the enrichment of all selected ptm_types
-        across selected rois on a per protein basis.
+        Dataframe reporting p-values for the enrichment of all selected
+        ptm_types across selected rois on a per protein basis.
     """
     enrichment_list = list()
     for df_prot in partition_df_by_prots(df):
@@ -1125,13 +1170,16 @@ def perform_enrichment_analysis_per_protein(df: pd.DataFrame,
                                           quality_cutoffs=quality_cutoffs,
                                           ptm_site_dict=ptm_site_dict,
                                           multiple_testing=False)
-        res.insert(loc=0, column='protein_id', value=np.repeat(protein_accession, res.shape[0]))
+        res.insert(loc=0, column='protein_id', value=np.repeat(
+            protein_accession, res.shape[0]))
         enrichment_list.append(res)
     enrichment_per_protein = pd.concat(enrichment_list)
     enrichment_per_protein = enrichment_per_protein[(enrichment_per_protein.n_aa_ptm >= 2) & (enrichment_per_protein.n_aa_roi >= enrichment_per_protein.n_aa_ptm)]
     enrichment_per_protein.reset_index(drop=True, inplace=True)
-    enrichment_per_protein['p_adj_bf'] = statsmodels.stats.multitest.multipletests(pvals=enrichment_per_protein.p, alpha=0.01, method='bonferroni')[1]
-    enrichment_per_protein['p_adj_bh'] = statsmodels.stats.multitest.multipletests(pvals=enrichment_per_protein.p, alpha=0.01, method='fdr_bh')[1]
+    enrichment_per_protein['p_adj_bf'] = statsmodels.stats.multitest.multipletests(
+        pvals=enrichment_per_protein.p, alpha=0.01, method='bonferroni')[1]
+    enrichment_per_protein['p_adj_bh'] = statsmodels.stats.multitest.multipletests(
+        pvals=enrichment_per_protein.p, alpha=0.01, method='fdr_bh')[1]
     return enrichment_per_protein
 
 
@@ -1146,16 +1194,20 @@ def find_idr_pattern(
     Parameters
     ----------
     idr_list : list
-        Nested list specifying the binary IDR condition and its length. For example: [[1,10],[0,30],[1,5]].
+        Nested list specifying the binary IDR condition and its length.
+        For example: [[1,10],[0,30],[1,5]].
     min_structured_length : int
-        Integer specifying the minimum number of amino acids in flanking structured regions.
+        Integer specifying the minimum number of amino acids in flanking
+        structured regions.
     max_unstructured_length : int
-        Integer specifying the maximum number of amino acids in the short intrinsically unstructured regions.
+        Integer specifying the maximum number of amino acids in the short
+        intrinsically unstructured regions.
 
     Returns
     -------
     : tuple
-        (bool, list) If a pattern was found and the list of start end end positions of short IDRs.
+        (bool, list) If a pattern was found and the list of start end end
+        positions of short IDRs.
     """
     window = np.array([0, 1, 2])
     i = 0
@@ -1188,9 +1240,11 @@ def annotate_proteins_with_idr_pattern(
     df : pd.DataFrame
         Dataframe with AlphaFold annotations.
     min_structured_length : int
-        Integer specifying the minimum number of amino acids in flanking structured regions.
+        Integer specifying the minimum number of amino acids in flanking
+        structured regions.
     max_unstructured_length : int
-        Integer specifying the maximum number of amino acids in the short intrinsically unstructured regions.
+        Integer specifying the maximum number of amino acids in the short
+        intrinsically unstructured regions.
 
     Returns
     -------
@@ -1206,9 +1260,10 @@ def annotate_proteins_with_idr_pattern(
         df_prot['flexible_pattern'] = 0
         protein_accession = df_prot.protein_id.values[0]
         idr_list = [[k, len(list(g))] for k, g in groupby(df_prot.IDR.values)]
-        pattern, pos_list = find_idr_pattern(idr_list,
-                                   min_structured_length=min_structured_length,
-                                   max_unstructured_length=max_unstructured_length)
+        pattern, pos_list = find_idr_pattern(
+            idr_list,
+            min_structured_length=min_structured_length,
+            max_unstructured_length=max_unstructured_length)
         pattern_position_list = list()
         if pattern:
             proteins.append(protein_accession)
@@ -1218,7 +1273,8 @@ def annotate_proteins_with_idr_pattern(
             pattern_position_list = pattern_position_list + [list(np.arange(p[0], p[1] + 1)) for p in pos_list]
             pattern_position_list = [item for sublist in pattern_position_list for item in sublist]
 
-            selected_locations = np.flatnonzero(df_prot.position.isin(pattern_position_list))
+            selected_locations = np.flatnonzero(df_prot.position.isin(
+                pattern_position_list))
             df_prot.loc[selected_locations, 'flexible_pattern'] = 1
         res_out.append(df_prot)
     res_out = pd.concat(res_out)
@@ -1239,8 +1295,8 @@ def extend_flexible_pattern(
     pattern : np.ndarray
         Array of binary pattern values.
     window : int
-        Integer specifying the number of positions to consider both before and after
-        the provided pattern.
+        Integer specifying the number of positions to consider both before
+        and after the provided pattern.
 
     Returns
     -------
@@ -1268,14 +1324,16 @@ def get_extended_flexible_pattern(
     windows: list,
 ) -> pd.DataFrame:
     """
-    Select columns in a dataframe for which to extend the pattern by the provided window.
+    Select columns in a dataframe for which to extend the pattern by the
+    provided window.
 
     Parameters
     ----------
     df : pd.DataFrame
         Dataframe with AlphaFold annotations.
     patterns : np.ndarray
-        Array of column names in the dataframe with binary values that should be extended.
+        Array of column names in the dataframe with binary values that should
+        be extended.
     windows : list
         List of one or more integers specifying the number of positions
         to consider both before and after a pattern.
@@ -1283,7 +1341,8 @@ def get_extended_flexible_pattern(
     Returns
     -------
     : pd.DataFrame
-        Input dataframe with additional columns containing the extended patterns.
+        Input dataframe with additional columns containing the extended
+        patterns.
     """
     df_out = []
     for df_prot in partition_df_by_prots(df):
@@ -1295,3 +1354,398 @@ def get_extended_flexible_pattern(
         df_out.append(df_prot)
     df_out = pd.concat(df_out)
     return df_out
+
+
+#  This function could be numba compatible
+def calculate_distances_between_ptms(
+    background_idx_list: list,
+    target_aa_idx: np.ndarray,
+    coords: np.ndarray,
+    positions: np.ndarray,
+    error_dist: np.ndarray
+) -> [list, list]:
+    """
+    Calculate the distances from a target amino acid to a list of background
+    amino acids.
+
+    Parameters
+    ----------
+    background_idx_list : list
+        List of amino acid indices that make up the background.
+    target_aa_idx : np.ndarray
+        Array of target amino acid indices.
+    coords : np.ndarray
+        Array of 3D coordinates of alpha carbon atoms across different
+        amino acids.
+    positions : np.ndarray
+        Array of amino acid positions from which to choose the specific indeces.
+    error_dist: : np.ndarray
+        Matrix of paired aligned errors of AlphaFold across all amino acids
+        in a protein qequence.
+
+    Returns
+    -------
+    : [list, list]
+        List of 3D distance results and list of 1D distance results
+    """
+    distance_res = list()
+    distance_1D_res = list()
+    for idx_list in background_idx_list:
+        aa_dist_list = list()
+        aa_1D_dist_list = list()
+        for i in idx_list:
+            aa_dist = list()
+            aa_1D_dist = list()
+            for aa_i in target_aa_idx:
+                aa_dist_i = get_3d_dist(
+                    coordinate_array_1=coords,
+                    coordinate_array_2=coords,
+                    idx_1=i,
+                    idx_2=aa_i)
+                aa_error_i = get_paired_error(
+                    position=positions,
+                    error_dist=error_dist,
+                    idx_1=i,
+                    idx_2=aa_i)
+                aa_dist.append(aa_dist_i+aa_error_i)
+                aa_1D_dist.append(abs(positions[i]-positions[aa_i]))
+            aa_dist_list.append(aa_dist)
+            aa_1D_dist_list.append(aa_1D_dist)
+        distance_res.append(aa_dist_list)
+        distance_1D_res.append(aa_1D_dist_list)
+    return distance_res, distance_1D_res
+
+
+def get_ptm_distance_list(
+    df: pd.DataFrame,
+    ptm_target: str,
+    ptm_background: str,
+    ptm_dict: dict,
+    error_dir: str,
+    filename_format: str = "pae_{}.hdf",
+    n_random: int = 10000,
+    random_seed: int = 44,
+) -> [list, list, list]:
+    """
+    Extract a lists of 3D and 1D distances between target amino acids and a
+    random background.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Dataframe with AlphaFold annotations.
+    ptm_target : str
+        String specifying the PTM type for which you want to evaluate if it
+        is in colocalizing with the background.
+    ptm_background : str
+        String specifying the PTM type that is used as background.
+    ptm_dict : dict
+        Dictionary containing the possible amino acid sites for each PTM.
+    error_dir : str
+        Path to the directory where the hdf files containing the matrices of
+        paired aligned errors of AlphaFold are stored.
+    filename_format : str
+        The file name of the pae files saved by download_alphafold_pae.
+        The brackets {} are replaced by a protein name from the proteins list.
+        Default is 'pae_{}.hdf'.
+    n_random : int
+        Number of random permutations to perform. Default is 10'000.
+        The higher the number of permutations, the more confidence the analysis
+        can achieve. However, a very high number of permutations increases
+        processing time. No fewer than 1'000 permutations should be used.
+    random_seed : int
+        Random seed for the analysis. Default is 44.
+
+    Returns
+    -------
+    : [list, list, list]
+        List of 3D distances, list of 1D distances and
+        list of modified indices.
+    """
+    random.seed(random_seed)
+    prot_distances = list()
+    prot_distances_1D = list()
+    prot_mod_idx = list()
+    for df_prot in partition_df_by_prots(df):
+        protein_accession = df_prot.protein_id.values[0]
+        if error_dir is not None:
+            with h5py.File(
+                os.path.join(
+                    error_dir,
+                    filename_format.format(protein_accession))
+                    ) as hdf_root:
+                error_dist = hdf_root['dist'][...]
+            size = int(np.sqrt(len(error_dist)))
+            error_dist = error_dist.reshape(size, size)
+        else:
+            error_dist = np.zeros((df_prot.shape[0], df_prot.shape[0]))
+        # amino acid residues of background PTM
+        background_aa = ptm_dict[ptm_background]
+        # indices of background_aa
+        background_idx = list(np.flatnonzero(df_prot.AA.isin(background_aa)))
+        # number of observed background modifications
+        n_aa_background_mod = np.sum(df_prot[ptm_background] == 1)
+        if n_aa_background_mod >= 1:
+            # indices of observed background PTMs
+            real_background_idx = df_prot.index[df_prot[ptm_background] == 1].tolist()
+            # list of random index lists for background PTMs
+            # @TODO: probably slowish due to making lists of 10000 elements,
+            # perhaps this can be avoided
+            background_idx_list = [random.sample(
+                background_idx,
+                len(real_background_idx)) for i in np.arange(0, n_random)]
+            # Combine real and random backround list with the real indices at
+            # position 0
+            background_idx_list.insert(0,real_background_idx)
+            # amino acid residues of target PTM
+            target_aa = ptm_dict[ptm_target]
+            # indices of target_aa
+            target_aa_idx = list(np.flatnonzero(df_prot.AA.isin(target_aa)))
+            # indices of observed target PTMs
+            target_mod_idx = df_prot.index[df_prot[ptm_target] == 1].tolist()
+            # index of observed PTMs within index list of all target_aa
+            target_aa_idx_mod_idx = [i for i in np.arange(len(target_aa_idx)) if target_aa_idx[i] in target_mod_idx]
+            distance_res, distance_1D_res = calculate_distances_between_ptms(
+                background_idx_list=np.array(background_idx_list),
+                target_aa_idx=np.array(target_aa_idx),
+                coords=np.vstack([
+                    df_prot.x_coord_ca.values,
+                    df_prot.y_coord_ca.values,
+                    df_prot.z_coord_ca.values]).T,
+                positions=df_prot.position.values,
+                error_dist=error_dist)
+            prot_distances.append(distance_res)
+            prot_distances_1D.append(distance_1D_res)
+            prot_mod_idx.append(target_aa_idx_mod_idx)
+    return prot_distances, prot_distances_1D, prot_mod_idx
+
+
+#  This function could be numba compatible
+def get_mod_ptm_fraction(
+    distances: list,
+    mod_idx: list,
+    min_dist: int,
+    max_dist: int
+) -> float:
+    """
+    Calculate the fraction of modified PTM acceptor residues within
+    a distance range.
+
+    Parameters
+    ----------
+    distances: list
+        List of 1D or 3D distances.
+    mod_idx: lists
+        List of indices to select which distances to consider.
+    min_dist: int
+        Minimum distance of the bin.
+    max_dist: int
+        Maximum distance of the bin.
+
+    Returns
+    -------
+    : float
+        Fraction of modified PTM acceptor residues within
+        the provided distance range.
+    """
+    n_aa = [0]*len(distances[0])
+    n_aa_mod = [0]*len(distances[0])
+    for idx, p in enumerate(distances):
+        rand_count = 0
+        for rand in p:
+            for back in rand:
+                n_aa[rand_count] += len([i for i in back if ((i > min_dist) & (i <= max_dist))])
+                mod_back = [back[i] for i in mod_idx[idx]]
+                n_aa_mod[rand_count] += len([i for i in mod_back if ((i > min_dist) & (i <= max_dist))])
+            rand_count += 1
+    mod_fraction = [mod/aa if aa>0 else np.nan for aa,mod in zip(n_aa, n_aa_mod)]
+    return mod_fraction
+
+
+def evaluate_ptm_colocalization(
+    df: pd.DataFrame,
+    ptm_target: str,
+    ptm_types: list,
+    ptm_dict: dict,
+    pae_dir: str,
+    filename_format: str = "pae_{}.hdf",
+    n_random: int = 5,
+    random_seed: int = 44,
+    min_dist: float = -0.01,
+    max_dist: float = 35,
+    dist_step: float = 5
+) -> pd.DataFrame:
+    """
+    Evaluate for a given target PTM type if modifications preferentially occur
+    closer to the provided background PTM types than expected by chance or at
+    distance bins that are further away.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Dataframe with AlphaFold annotations.
+    ptm_target : str
+        String specifying the PTM type for which you want to evaluate if it
+        is in colocalizing with the background.
+    ptm_types : list of strings
+        List of strings specifying the PTM types that should be used as
+        background. If "self" is included, this means that the ptm_target
+        is used also as backround modification.
+    ptm_dict : dict
+        Dictionary containing the possible amino acid sites for each PTM.
+    pae_dir : str
+        Path to the directory where the hdf files containing the matrices of
+        paired aligned errors of AlphaFold are stored.
+    filename_format : str
+        The file name of the pae files saved by download_alphafold_pae.
+        The brackets {} are replaced by a protein name from the proteins list.
+        Default is 'pae_{}.hdf'.
+    n_random : int
+        Number of random permutations to perform. Default is 10'000.
+        The higher the number of permutations, the more confidence the analysis
+        can achieve. However, a very high number of permutations increases
+        processing time. No fewer than 1'000 permutations should be used.
+    random_seed : int
+        Random seed for the analysis. Default is 44.
+    min_dist : float
+        Minimum distance to consider.
+        Default is 0, meaning that the target amino acid is included itself.
+    max_dist : float
+        Maximum distance to consider.
+        Default is 35.
+    dist_step : float
+        Stepsize for distance bins between min_dist and max_dist.
+        Default is 5.
+
+    Returns
+    -------
+    : pd.DataFrame
+        Dataframe with following columns: 'context', 'ptm_types', 'cutoff',
+        'std_random_fraction', 'variable', 'value'
+    """
+    distance_cutoffs = np.arange(min_dist, max_dist, dist_step)
+    # might want to change to np.linspace above
+    cutoff_list = list()
+    ptm_list = list()
+    real_fraction_3D = list()
+    mean_random_fraction_3D = list()
+    std_random_fraction_3D = list()
+    real_fraction_1D = list()
+    mean_random_fraction_1D = list()
+    std_random_fraction_1D = list()
+    for ptm_type in ptm_types:
+        if ptm_target == 'self':
+            ptm_target = ptm_type
+        distances_3D, distances_1D, mod_idx = get_ptm_distance_list(
+            df=df,
+            ptm_target=ptm_target,
+            ptm_background=ptm_type,
+            ptm_dict=ptm_dict,
+            error_dir=pae_dir,
+            filename_format=filename_format,
+            n_random=n_random,
+            random_seed=random_seed
+        )
+        dist_i = 0
+        for dist_cut in distance_cutoffs:
+            ptm_list.append(ptm_type)
+            cutoff_list.append(dist_cut+dist_step)
+            if dist_i == 0:
+                # make sure that the minimum is incuded
+                dist_step_mod = 0.001
+            else:
+                dist_step_mod = 0
+            mod_fraction_3D = get_mod_ptm_fraction(
+                distances_3D,
+                mod_idx,
+                min_dist=dist_cut-dist_step_mod,
+                max_dist=dist_cut+dist_step)
+            real_fraction_3D.append(mod_fraction_3D[0])
+            mean_random_fraction_3D.append(np.mean(mod_fraction_3D[1:]))
+            std_random_fraction_3D.append(np.std(mod_fraction_3D[1:]))
+            mod_fraction_1D = get_mod_ptm_fraction(
+                distances_1D,
+                mod_idx,
+                min_dist=dist_cut-dist_step_mod,
+                max_dist=dist_cut+dist_step)
+            real_fraction_1D.append(mod_fraction_1D[0])
+            mean_random_fraction_1D.append(np.mean(mod_fraction_1D[1:]))
+            std_random_fraction_1D.append(np.std(mod_fraction_1D[1:]))
+            dist_i += 1
+    res_df_3D = pd.DataFrame({
+        'context': np.repeat('3D', len(cutoff_list)),
+        'cutoff': cutoff_list,
+        'ptm_types': ptm_list,
+        'Observed': real_fraction_3D,
+        'Random sampling': mean_random_fraction_3D,
+        'std_random_fraction': std_random_fraction_3D})
+    res_df_1D = pd.DataFrame({
+        'context': np.repeat('1D', len(cutoff_list)),
+        'cutoff': cutoff_list,
+        'ptm_types': ptm_list,
+        'Observed': real_fraction_1D,
+        'Random sampling': mean_random_fraction_1D,
+        'std_random_fraction': std_random_fraction_1D})
+    res_df_3D = res_df_3D.melt(
+        id_vars=["context", "ptm_types", "cutoff", "std_random_fraction"])
+    res_df_1D = res_df_1D.melt(
+        id_vars=["context", "ptm_types", "cutoff", "std_random_fraction"])
+    res_df = pd.concat([res_df_3D, res_df_1D])
+    res_df['std_random_fraction'] = np.where(
+        res_df.variable == 'Observed', 0, res_df.std_random_fraction)
+    return res_df
+
+
+def extract_motifs_in_proteome(
+    alphafold_df: pd.DataFrame,
+    motif_df: pd.DataFrame
+):
+    """
+    Function to find occurences of short linear motifs in the proteome.
+
+    Parameters
+    ----------
+    alphafold_df : pd.DataFrame
+        Dataframe with AlphaFold annotations.
+    motif_df : pd.DataFrame
+        Dataframe with following columns: 'enzyme', 'motif', 'mod_pos'.
+
+    Returns
+    -------
+    : pd.DataFrame
+        Dataframe containing information about short linear motifs in the
+        proteome. Following columns are privided: 'protein_id', 'enzyme',
+        'motif','position','AA','motif_start','motif_end','sequence_window'
+    """
+    proteins = list()
+    enzyme_list = list()
+    motif_list = list()
+    site_list = list()
+    start_list = list()
+    end_list = list()
+    AA_list = list()
+    sequence_window_list = list()
+    for df_prot in partition_df_by_prots(alphafold_df):
+        df_prot['flexible_pattern'] = 0
+        protein_accession = df_prot.protein_id.values[0]
+        sequence = ''.join(df_prot.AA)
+        for i in np.arange(0, motif_df.shape[0]):
+            for j in re.finditer(motif_df.motif.values[i], sequence):
+                proteins.append(protein_accession)
+                enzyme_list.append(motif_df.enzyme.values[i])
+                motif_list.append(motif_df.motif.values[i])
+                site_list.append(j.start() + motif_df.mod_pos.values[i] + 1)
+                start_list.append(j.start() + 1)
+                end_list.append(j.end())
+                AA_list.append(sequence[j.start() + motif_df.mod_pos.values[i]])
+                sequence_window_list.append(sequence[(j.start() + motif_df.mod_pos.values[i] - 10): (j.start() + motif_df.mod_pos.values[i] + 10)])
+    motif_res = pd.DataFrame({
+        'protein_id': proteins,
+        'enzyme': enzyme_list,
+        'motif': motif_list,
+        'position': site_list,
+        'AA': AA_list,
+        'motif_start': start_list,
+        'motif_end': end_list,
+        'sequence_window': sequence_window_list})
+    return motif_res
