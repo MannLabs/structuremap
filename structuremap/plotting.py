@@ -46,6 +46,8 @@ def plot_enrichment(
     data: pd.DataFrame,
     ptm_select: list = None,
     roi_select: list = None,
+    plot_width: int = None,
+    plot_height: int = None,
 ):
     """
     Plot the enrichment of PTMs in different protein regions.
@@ -61,6 +63,10 @@ def plot_enrichment(
     roi_select : list
         List of regions of interest (ROIs) to show.
         Default is None, which shows all ROIs in data.
+    plot_width : int
+        Integer specifying plot width. Default is None.
+    plot_height : int
+        Integer specifying plot height. Default is None.
 
     Returns
     -------
@@ -102,10 +108,24 @@ def plot_enrichment(
                  color_discrete_map=color_dict,
                  template="simple_white",
                  )
+    if plot_width is None:
+        p_width = 400+(len(df.ptm.unique())*20)
+    elif plot_width > 0:
+        p_width = plot_width
+    else:
+        raise ValueError(
+            f"{plot_width} is not a valid parameter for plot_width. plot_width needs to be a positive integer.")
+    if plot_height is None:
+        p_height = 500
+    elif plot_height > 0:
+        p_height = plot_height
+    else:
+        raise ValueError(
+            f"{plot_height} is not a valid parameter for plot_height. plot_height needs to be a positive integer.")
     fig.update_layout(
         autosize=False,
-        width=400+(len(df.ptm.unique())*20),
-        height=500,
+        width=p_width,
+        height=p_height,
         margin=dict(
             autoexpand=False,
             l=100,
@@ -122,7 +142,9 @@ def plot_enrichment(
 def plot_ptm_colocalization(
     df,
     name='Fraction of modified acceptor residues',
-    context=None
+    context=None,
+    plot_width: int = None,
+    plot_height: int = None,
 ):
     """
     Plot PTMs co-localization.
@@ -138,12 +160,36 @@ def plot_ptm_colocalization(
     context : str
         Either '3D', '1D' or None.
         Default is None, which shows both 1D and 3D results.
+    plot_width : int
+        Integer specifying plot width. Default is None.
+    plot_height : int
+        Integer specifying plot height. Default is None.
 
     Returns
     -------
     : plot
         Figure showing PTMs co-localization across distance bins.
     """
+    if plot_width is None:
+        if context in ['1D', '3D']:
+            p_width = 1100
+        else:
+            p_width = 1000
+    elif plot_width > 0:
+        p_width = plot_width
+    else:
+        raise ValueError(
+            f"{plot_width} is not a valid parameter for plot_width. plot_width needs to be a positive integer.")
+    if plot_height is None:
+        if context in ['1D', '3D']:
+            p_height = 350
+        else:
+            p_height = 1800
+    elif plot_height > 0:
+        p_height = plot_height
+    else:
+        raise ValueError(
+            f"{plot_height} is not a valid parameter for plot_height. plot_height needs to be a positive integer.")
     if context in ['1D', '3D']:
         df = df[df.context == context]
         fig = px.scatter(
@@ -158,7 +204,6 @@ def plot_ptm_colocalization(
                     "ptm_types": "",
                     "variable": ""},
             color_discrete_sequence=['rgb(177, 63, 100)', 'grey'])
-        fig = fig.update_layout(width=1100, height=350)
         fig = fig.update_yaxes(matches=None, showticklabels=True, col=1)
         fig = fig.update_yaxes(matches=None, showticklabels=True, col=2)
         fig = fig.update_yaxes(matches=None, showticklabels=True, col=3)
@@ -177,10 +222,10 @@ def plot_ptm_colocalization(
                     "ptm_types": "",
                     "variable": ""},
             color_discrete_sequence=['rgb(177, 63, 100)', 'grey'])
-        fig = fig.update_layout(width=1000, height=1800)
         fig = fig.update_yaxes(matches=None)
     else:
-        raise ValueError("f{context} is not a valid context")
+        raise ValueError(f"{context} is not a valid context")
+    fig = fig.update_layout(width=p_width, height=p_height)
     fig = fig.update_layout(title=name,
                             template="simple_white")
     config = {'toImageButtonOptions': {'format': 'svg', 'filename': name}}
