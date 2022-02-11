@@ -76,11 +76,11 @@ def plot_enrichment(
     df = data.copy(deep=True)
     df['ptm'] = [re.sub('_', ' ', p) for p in df['ptm']]
     category_dict = {}
-    if ptm_select is None:
+    if ptm_select is not None:
         ptm_select = [re.sub('_', ' ', p) for p in ptm_select]
         df = df[df.ptm.isin(ptm_select)]
         category_dict['ptm'] = ptm_select
-    if roi_select is None:
+    if roi_select is not None:
         df = df[df.roi.isin(roi_select)]
         category_dict['roi'] = roi_select
     df['log_odds_ratio'] = np.log(df['oddsr'])
