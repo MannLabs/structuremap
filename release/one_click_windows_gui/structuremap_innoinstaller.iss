@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "structuremap"
-#define MyAppVersion "0.0.1"
+#define MyAppVersion "0.0.2"
 #define MyAppPublisher "Max Planck Institute of Biochemistry and the University of Copenhagen, Mann Labs"
 #define MyAppURL "https://github.com/MannLabs/structuremap"
 #define MyAppExeName "structuremap_gui.exe"
