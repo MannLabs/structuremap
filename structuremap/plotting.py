@@ -210,6 +210,8 @@ def plot_ptm_colocalization(
         fig = fig.update_yaxes(matches=None, showticklabels=True, col=3)
         fig = fig.update_yaxes(matches=None, showticklabels=True, col=4)
         fig = fig.update_yaxes(matches=None, showticklabels=True, col=5)
+        fig = fig.update_yaxes(matches=None, showticklabels=True, col=6)
+        fig = fig.update_yaxes(matches=None, showticklabels=True, col=7)
     elif context is None:
         fig = px.scatter(
             df,
