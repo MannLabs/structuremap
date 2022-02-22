@@ -1630,9 +1630,11 @@ def evaluate_ptm_colocalization(
     real_fraction_3D = list()
     mean_random_fraction_3D = list()
     std_random_fraction_3D = list()
+    ttest_pval_3D = list()
     real_fraction_1D = list()
     mean_random_fraction_1D = list()
     std_random_fraction_1D = list()
+    ttest_pval_1D = list()
     for ptm_type in ptm_types:
         if ptm_target == 'self':
             ptm_target = ptm_type
@@ -1663,6 +1665,7 @@ def evaluate_ptm_colocalization(
             real_fraction_3D.append(mod_fraction_3D[0])
             mean_random_fraction_3D.append(np.mean(mod_fraction_3D[1:]))
             std_random_fraction_3D.append(np.std(mod_fraction_3D[1:]))
+            ttest_pval_3D.append(scipy.stats.ttest_1samp(mod_fraction_3D[1:], mod_fraction_3D[0]).pvalue)
             mod_fraction_1D = get_mod_ptm_fraction(
                 distances_1D,
                 mod_idx,
@@ -1671,6 +1674,7 @@ def evaluate_ptm_colocalization(
             real_fraction_1D.append(mod_fraction_1D[0])
             mean_random_fraction_1D.append(np.mean(mod_fraction_1D[1:]))
             std_random_fraction_1D.append(np.std(mod_fraction_1D[1:]))
+            ttest_pval_1D.append(scipy.stats.ttest_1samp(mod_fraction_1D[1:], mod_fraction_1D[0]).pvalue)
             dist_i += 1
     res_df_3D = pd.DataFrame({
         'context': np.repeat('3D', len(cutoff_list)),
@@ -1678,18 +1682,20 @@ def evaluate_ptm_colocalization(
         'ptm_types': ptm_list,
         'Observed': real_fraction_3D,
         'Random sampling': mean_random_fraction_3D,
-        'std_random_fraction': std_random_fraction_3D})
+        'std_random_fraction': std_random_fraction_3D,
+        'pvalue': ttest_pval_3D})
     res_df_1D = pd.DataFrame({
         'context': np.repeat('1D', len(cutoff_list)),
         'cutoff': cutoff_list,
         'ptm_types': ptm_list,
         'Observed': real_fraction_1D,
         'Random sampling': mean_random_fraction_1D,
-        'std_random_fraction': std_random_fraction_1D})
+        'std_random_fraction': std_random_fraction_1D,
+        'pvalue': ttest_pval_1D})
     res_df_3D = res_df_3D.melt(
-        id_vars=["context", "ptm_types", "cutoff", "std_random_fraction"])
+        id_vars=["context", "ptm_types", "cutoff", "std_random_fraction","pvalue"])
     res_df_1D = res_df_1D.melt(
-        id_vars=["context", "ptm_types", "cutoff", "std_random_fraction"])
+        id_vars=["context", "ptm_types", "cutoff", "std_random_fraction","pvalue"])
     res_df = pd.concat([res_df_3D, res_df_1D])
     res_df['std_random_fraction'] = np.where(
         res_df.variable == 'Observed', 0, res_df.std_random_fraction)
