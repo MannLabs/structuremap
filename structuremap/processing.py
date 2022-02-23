@@ -143,8 +143,9 @@ def download_alphafold_pae(
         else:
             try:
                 name_in = alphafold_pae_url.format(protein)
-                with urllib.request.urlopen(name_in) as url:
-                    data = json.loads(url.read().decode())
+                urllib.request.urlretrieve(name_in, 'temp_pae')
+                with open('temp_pae') as f:
+                    data = json.loads(f.read())
                 dist = np.array(data[0]['distance'])
                 data_list = [('dist', dist)]
                 with h5py.File(name_out, 'w') as hdf_root:
