@@ -9,6 +9,7 @@ from itertools import groupby
 import urllib.request
 import random
 import logging
+import ssl
 
 # external
 import numba
@@ -19,7 +20,11 @@ import h5py
 import statsmodels.stats.multitest
 import Bio.PDB.MMCIF2Dict
 import scipy.stats
+import sys 
 
+if getattr(sys, 'frozen', False):
+    print('Using frozen version. Setting SSL context to unverified.')
+    ssl._create_default_https_context = ssl._create_unverified_context
 
 def download_alphafold_cif(
     proteins: list,
