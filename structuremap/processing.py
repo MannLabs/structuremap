@@ -19,6 +19,7 @@ import h5py
 import statsmodels.stats.multitest
 import Bio.PDB.MMCIF2Dict
 import scipy.stats
+import sys 
 
 
 def download_alphafold_cif(
@@ -62,6 +63,8 @@ def download_alphafold_cif(
     if not os.path.exists(out_folder):
         os.makedirs(out_folder)
     for protein in tqdm.tqdm(proteins):
+        if getattr(sys, 'frozen', False):
+            alphafold_cif_url.replace('https','http') #Use http instead of https for frozen version
         name_in = alphafold_cif_url.format(protein)
         name_out = os.path.join(
             out_folder,
@@ -137,6 +140,8 @@ def download_alphafold_pae(
             existing_proteins.append(protein)
         else:
             try:
+                if getattr(sys, 'frozen', False):
+                    alphafold_pae_url.replace('https','http') #Use http instead of https for frozen version
                 name_in = alphafold_pae_url.format(protein)
                 with urllib.request.urlopen(name_in) as url:
                     data = json.loads(url.read().decode())
