@@ -9,6 +9,7 @@ from itertools import groupby
 import urllib.request
 import random
 import logging
+import ssl
 
 # external
 import numba
@@ -21,6 +22,9 @@ import Bio.PDB.MMCIF2Dict
 import scipy.stats
 import sys 
 
+if getattr(sys, 'frozen', False):
+    print('Using frozen version. Setting SSL context to unverified.')
+    ssl._create_default_https_context = ssl._create_unverified_context
 
 def download_alphafold_cif(
     proteins: list,
@@ -63,8 +67,6 @@ def download_alphafold_cif(
     if not os.path.exists(out_folder):
         os.makedirs(out_folder)
     for protein in tqdm.tqdm(proteins):
-        if getattr(sys, 'frozen', False):
-            alphafold_cif_url.replace('https','http') #Use http instead of https for frozen version
         name_in = alphafold_cif_url.format(protein)
         name_out = os.path.join(
             out_folder,
@@ -140,8 +142,6 @@ def download_alphafold_pae(
             existing_proteins.append(protein)
         else:
             try:
-                if getattr(sys, 'frozen', False):
-                    alphafold_pae_url.replace('https','http') #Use http instead of https for frozen version
                 name_in = alphafold_pae_url.format(protein)
                 with urllib.request.urlopen(name_in) as url:
                     data = json.loads(url.read().decode())
