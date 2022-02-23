@@ -190,6 +190,7 @@ def plot_ptm_colocalization(
     else:
         raise ValueError(
             f"{plot_height} is not a valid parameter for plot_height. plot_height needs to be a positive integer.")
+    df['variable_sig'] = np.where(((df['pvalue']<=0.01) & (df['variable']=='Observed')), 'Observed (p <= 0.01)', df['variable'])
     if context in ['1D', '3D']:
         df = df[df.context == context]
         fig = px.scatter(
@@ -197,14 +198,14 @@ def plot_ptm_colocalization(
             x="cutoff",
             y="value",
             error_y="std_random_fraction",
-            color="variable",
+            color="variable_sig",
             facet_col="ptm_types",
             facet_col_spacing=0.05,
             labels={"value": "Fraction of modified acceptors",
                     "cutoff": "distance bin",
                     "ptm_types": "",
-                    "variable": ""},
-            color_discrete_sequence=['rgb(177, 63, 100)', 'grey'])
+                    "variable_sig": ""},
+            color_discrete_sequence=['rgb(177, 63, 100)', '#FA8072', 'grey'])
         fig = fig.update_yaxes(matches=None, showticklabels=True, col=1)
         fig = fig.update_yaxes(matches=None, showticklabels=True, col=2)
         fig = fig.update_yaxes(matches=None, showticklabels=True, col=3)
@@ -218,14 +219,14 @@ def plot_ptm_colocalization(
             x="cutoff",
             y="value",
             error_y="std_random_fraction",
-            color="variable",
+            color="variable_sig",
             facet_row="ptm_types",
             facet_col="context",
             labels={"value": "Fraction of modified acceptors",
                     "cutoff": "distance bin",
                     "ptm_types": "",
-                    "variable": ""},
-            color_discrete_sequence=['rgb(177, 63, 100)', 'grey'])
+                    "variable_sig": ""},
+            color_discrete_sequence=['rgb(177, 63, 100)', '#FA8072', 'grey'])
         fig = fig.update_yaxes(matches=None)
     else:
         raise ValueError(f"{context} is not a valid context")
