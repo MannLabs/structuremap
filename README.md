@@ -16,7 +16,7 @@ An open-source Python package for integrating information from predicted protein
 * [**Usage**](#usage)
   * [**Python and jupyter notebooks**](#python-and-jupyter-notebooks)
 * [**Troubleshooting**](#troubleshooting)
-* [**Citations**](#citations)
+* [**Citing structuremap**](#citing-structuremap)
 * [**How to contribute**](#how-to-contribute)
 * [**Changelog**](#changelog)
 
@@ -113,9 +113,9 @@ In case of issues, check out the following:
 * [Discussions](https://github.com/MannLabs/structuremap/discussions): Check if your problem or feature requests has been discussed before.
 
 ---
-## Citations
+## Citing structuremap
 
-A manuscript is currently in preparation. 
+If you use structuremap for your work, please cite our paper on biorxiv: https://www.biorxiv.org/content/10.1101/2022.02.23.481596v1
 
 ---
 ## How to contribute
