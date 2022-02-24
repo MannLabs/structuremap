@@ -10,6 +10,7 @@ import urllib.request
 import random
 import logging
 import ssl
+import tempfile
 
 # external
 import numba
@@ -20,7 +21,7 @@ import h5py
 import statsmodels.stats.multitest
 import Bio.PDB.MMCIF2Dict
 import scipy.stats
-import sys 
+import sys
 
 if getattr(sys, 'frozen', False):
     print('Using frozen version. Setting SSL context to unverified.')
@@ -143,9 +144,9 @@ def download_alphafold_pae(
         else:
             try:
                 name_in = alphafold_pae_url.format(protein)
-                urllib.request.urlretrieve(name_in, 'temp_pae')
-                with open('temp_pae') as f:
-                    data = json.loads(f.read())
+                with tempfile.NamedTemporaryFile() as tmp_pae_file:
+                    urllib.request.urlretrieve(name_in, tmp_pae_file.name)
+                    data = json.loads(tmp_pae_file.read())
                 dist = np.array(data[0]['distance'])
                 data_list = [('dist', dist)]
                 with h5py.File(name_out, 'w') as hdf_root:
