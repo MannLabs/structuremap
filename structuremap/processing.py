@@ -155,7 +155,7 @@ def download_alphafold_pae(
                 dist = np.array(data[0]['distance'])
                 data_list = [('dist', dist)]
                 if getattr(sys, 'frozen', False):
-                    print('Using frozen h5py w/o compression')
+                    print('Using frozen h5py w/ gzip compression')
                     with h5py.File(name_out, 'w') as hdf_root:
                         for key, data in data_list:
                             print(f'h5py {key}')
