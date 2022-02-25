@@ -162,6 +162,8 @@ def download_alphafold_pae(
                             hdf_root.create_dataset(
                                                 name=key,
                                                 data=data,
+                                                compression="gzip",
+                                                shuffle=True,
                                             )
                     print('Done')
                 else:
