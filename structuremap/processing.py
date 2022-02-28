@@ -154,14 +154,28 @@ def download_alphafold_pae(
                         data = json.loads(tmp_pae_file.read())
                 dist = np.array(data[0]['distance'])
                 data_list = [('dist', dist)]
-                with h5py.File(name_out, 'w') as hdf_root:
-                    for key, data in data_list:
-                        hdf_root.create_dataset(
-                                            name=key,
-                                            data=data,
-                                            compression="lzf",
-                                            shuffle=True,
-                                        )
+                if getattr(sys, 'frozen', False):
+                    print('Using frozen h5py w/ gzip compression')
+                    with h5py.File(name_out, 'w') as hdf_root:
+                        for key, data in data_list:
+                            print(f'h5py {key}')
+                            hdf_root.create_dataset(
+                                                name=key,
+                                                data=data,
+                                                compression="gzip",
+                                                shuffle=True,
+                                            )
+                    print('Done')
+                else:
+                    with h5py.File(name_out, 'w') as hdf_root:
+                        for key, data in data_list:
+                            hdf_root.create_dataset(
+                                                name=key,
+                                                data=data,
+                                                compression="lzf",
+                                                shuffle=True,
+                                            )
+
                 valid_proteins.append(protein)
             except urllib.error.HTTPError:
                 if verbose_log:
