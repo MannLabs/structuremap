@@ -154,14 +154,28 @@ def download_alphafold_pae(
                         data = json.loads(tmp_pae_file.read())
                 dist = np.array(data[0]['distance'])
                 data_list = [('dist', dist)]
-                with h5py.File(name_out, 'w') as hdf_root:
-                    for key, data in data_list:
-                        hdf_root.create_dataset(
-                                            name=key,
-                                            data=data,
-                                            compression="lzf",
-                                            shuffle=True,
-                                        )
+                if getattr(sys, 'frozen', False):
+                    print('Using frozen h5py w/ gzip compression')
+                    with h5py.File(name_out, 'w') as hdf_root:
+                        for key, data in data_list:
+                            print(f'h5py {key}')
+                            hdf_root.create_dataset(
+                                                name=key,
+                                                data=data,
+                                                compression="gzip",
+                                                shuffle=True,
+                                            )
+                    print('Done')
+                else:
+                    with h5py.File(name_out, 'w') as hdf_root:
+                        for key, data in data_list:
+                            hdf_root.create_dataset(
+                                                name=key,
+                                                data=data,
+                                                compression="lzf",
+                                                shuffle=True,
+                                            )
+
                 valid_proteins.append(protein)
             except urllib.error.HTTPError:
                 if verbose_log:
@@ -1767,3 +1781,84 @@ def extract_motifs_in_proteome(
         'motif_end': end_list,
         'sequence_window': sequence_window_list})
     return motif_res
+
+
+def import_ptms_for_structuremap(
+    file: str,
+    organism: str
+) -> pd.DataFrame:
+    """
+    Function to import PTM datasets.
+
+    Parameters
+    ----------
+    file : str
+        Path to the PTM dataset to load.
+        This can be processed by AlphaPept, Spectronaut, MaxQuant, DIA-NN or
+        FragPipe.
+    organism : str
+        Organism for which a fasta file should be imported.
+
+    Returns
+    -------
+    : pd.DataFrame
+        Dataframe with PTM information. It contains following columns:
+        protein_id: a unique UniProt identifier;
+        AA: the one letter amino acid abbreviation of the PTM acceptor;
+        position: the sequence position of the PTM acceptor
+        (the first amino acid has position 1);
+        <PTM types>: N columns for N different PTM types where 1 indicates that
+        the PTM is present at the given amino acid postition
+        and 0 indicates no modification
+    """
+    try:
+        from alphamap.organisms_data import import_fasta
+        from alphamap.importing import import_data
+        from alphamap.preprocessing import format_input_data
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(f"Please install alphamap. Subsequently install pandas==1.4.0.")
+    fasta_in = import_fasta('Human')
+    df = import_data(file)
+    df = format_input_data(df=df,
+                           fasta=fasta_in,
+                           modification_exp=r'\[.*?\]')
+    ptm_df = df.explode(['PTMsites', 'PTMtypes'])
+    ptm_df = ptm_df.dropna(subset=['PTMsites', 'PTMtypes'])
+    ptm_df = ptm_df.astype({'PTMsites': 'int32'})
+    ptm_df["AA"] = ptm_df.apply(
+        lambda x: x["naked_sequence"][x["PTMsites"]],
+        axis=1)
+    ptm_df["position"] = ptm_df.apply(
+        lambda x: x["start"]+x["PTMsites"]+1,
+        axis=1)
+    ptm_df = ptm_df[["unique_protein_id", "AA", "position", "PTMtypes"]]
+    ptm_df = pd.get_dummies(
+        ptm_df, prefix="", prefix_sep='', columns=["PTMtypes"])
+    ptm_df = ptm_df.rename(columns={"unique_protein_id": "protein_id"})
+    ptm_df = ptm_df.groupby(['protein_id', 'AA', 'position'])
+    ptm_df = ptm_df.max()
+    ptm_df = ptm_df.reset_index()
+    ptm_df = ptm_df.drop_duplicates()
+    ptm_df = ptm_df.reset_index(drop=True)
+    return ptm_df
+
+
+def format_for_3Dviz(
+    df: pd.DataFrame,
+    ptm_dataset: str
+) -> pd.DataFrame:
+    df_mod = df[["protein_id", "AA", "position", ptm_dataset]]
+    df_mod = df_mod.rename(columns={"protein_id": "unique_protein_id",
+                                    "AA": "modified_sequence",
+                                    "position": "start"})
+    df_mod["modified_sequence"] = [mod+"_"+str(i) for i,mod in enumerate(df_mod["modified_sequence"])]
+    df_mod["all_protein_ids"] = df_mod["unique_protein_id"]
+    df_mod["PTMsites"] = 0
+    df_mod["start"] = df_mod["start"]-1
+    df_mod["end"] = df_mod["start"]
+    df_mod["PTMsites"] = [[i] for i in df_mod["PTMsites"]]
+    df_mod = df_mod[df_mod[ptm_dataset] == 1]
+    df_mod["marker_symbol"] = 1
+    df_mod["PTMtypes"] = [[ptm_dataset] for i in df_mod["PTMsites"]]
+    df_mod = df_mod.dropna(subset=['PTMtypes']).reset_index(drop=True)
+    return df_mod
