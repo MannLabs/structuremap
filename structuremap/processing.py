@@ -1817,7 +1817,7 @@ def import_ptms_for_structuremap(
         from alphamap.preprocessing import format_input_data
     except ModuleNotFoundError:
         raise ModuleNotFoundError(f"Please install alphamap. Subsequently install pandas==1.4.0.")
-    fasta_in = import_fasta('Human')
+    fasta_in = import_fasta(organism)
     df = import_data(file)
     df = format_input_data(df=df,
                            fasta=fasta_in,
