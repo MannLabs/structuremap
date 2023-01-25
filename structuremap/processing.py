@@ -71,12 +71,6 @@ def download_alphafold_cif(
     if not os.path.exists(out_folder):
         os.makedirs(out_folder)
     for protein in tqdm.tqdm(proteins):
-        for AFversion in AFversions:
-            response = requests.get(alphafold_cif_url.format(protein=protein,version=AFversion, type=bioType))
-            if response.status_code == 200:
-                latest_AFversion = AFversion
-                break
-        name_in = alphafold_cif_url.format(protein=protein,version=latest_AFversion)
         name_out = os.path.join(
             out_folder,
             out_format.format(protein)
@@ -84,6 +78,12 @@ def download_alphafold_cif(
         if os.path.isfile(name_out):
             existing_proteins.append(protein)
         else:
+            for AFversion in AFversions:
+                response = requests.get(alphafold_cif_url.format(protein=protein,version=AFversion))
+                if response.status_code == 200:
+                    latest_AFversion = AFversion
+                    break
+            name_in = alphafold_cif_url.format(protein=protein,version=latest_AFversion)
             try:
                 urllib.request.urlretrieve(name_in, name_out)
                 valid_proteins.append(protein)
@@ -101,7 +101,7 @@ def download_alphafold_pae(
     proteins: list,
     out_folder: str,
     out_format: str = "pae_{}.hdf",
-    alphafold_pae_url: str = 'https://alphafold.ebi.ac.uk/files/AF-{}-F1-predicted_aligned_error_v1.json',
+    alphafold_pae_url: str = 'https://alphafold.ebi.ac.uk/files/AF-{}-F1-predicted_aligned_error_v{version}.json',
     timeout: int = 60,
     verbose_log: bool = False,
 ) -> tuple:
@@ -140,6 +140,7 @@ def download_alphafold_pae(
     valid_proteins = []
     invalid_proteins = []
     existing_proteins = []
+    AFversions = [9, 8, 7, 6, 5, 4, 3, 2, 1] #Dirty fix, but should hold up for the foreseeable future
     if not os.path.exists(out_folder):
         os.makedirs(out_folder)
     for protein in tqdm.tqdm(proteins):
@@ -151,7 +152,12 @@ def download_alphafold_pae(
             existing_proteins.append(protein)
         else:
             try:
-                name_in = alphafold_pae_url.format(protein)
+                for AFversion in AFversions:
+                    response = requests.get(alphafold_cif_url.format(protein=protein,version=AFversion))
+                    if response.status_code == 200:
+                        latest_AFversion = AFversion
+                        break
+                name_in = alphafold_pae_url.format(protein=protein,version=latest_AFversion)
                 with tempfile.TemporaryDirectory() as tmp_pae_dir:
                     tmp_pae_file_name = os.path.join(
                         tmp_pae_dir,
