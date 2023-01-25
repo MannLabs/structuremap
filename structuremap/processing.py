@@ -11,6 +11,7 @@ import random
 import logging
 import ssl
 import tempfile
+import requests
 
 # external
 import numba
@@ -31,7 +32,7 @@ def download_alphafold_cif(
     proteins: list,
     out_folder: str,
     out_format: str = "{}.cif",
-    alphafold_cif_url: str = 'https://alphafold.ebi.ac.uk/files/AF-{}-F1-model_v1.cif',
+    alphafold_cif_url: str = 'https://alphafold.ebi.ac.uk/files/AF-{protein}-F1-model_v{version}.cif',
     timeout: int = 60,
     verbose_log: bool = False,
 ) -> tuple:
@@ -65,10 +66,17 @@ def download_alphafold_cif(
     valid_proteins = []
     invalid_proteins = []
     existing_proteins = []
+    AFversions = [9, 8, 7, 6, 5, 4, 3, 2, 1] #Dirty fix, but should hold up for the foreseeable future
+
     if not os.path.exists(out_folder):
         os.makedirs(out_folder)
     for protein in tqdm.tqdm(proteins):
-        name_in = alphafold_cif_url.format(protein)
+        for AFversion in AFversions:
+            response = requests.get(alphafold_cif_url.format(protein=protein,version=AFversion, type=bioType))
+            if response.status_code == 200:
+                latest_AFversion = AFversion
+                break
+        name_in = alphafold_cif_url.format(protein=protein,version=latest_AFversion)
         name_out = os.path.join(
             out_folder,
             out_format.format(protein)
