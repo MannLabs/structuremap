@@ -166,7 +166,10 @@ def download_alphafold_pae(
                     urllib.request.urlretrieve(name_in, tmp_pae_file_name)
                     with open(tmp_pae_file_name) as tmp_pae_file:
                         data = json.loads(tmp_pae_file.read())
-                dist = np.array(data[0]['distance'])
+                if latest_AFversion < 3: 
+                    dist = np.array(data[0]['distance'])
+                else:
+                    dist = [item for sublist in data[0]["predicted_aligned_error"] for item in sublist]
                 data_list = [('dist', dist)]
                 if getattr(sys, 'frozen', False):
                     print('Using frozen h5py w/ gzip compression')
