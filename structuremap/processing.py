@@ -101,7 +101,7 @@ def download_alphafold_pae(
     proteins: list,
     out_folder: str,
     out_format: str = "pae_{}.hdf",
-    alphafold_pae_url: str = 'https://alphafold.ebi.ac.uk/files/AF-{}-F1-predicted_aligned_error_v{version}.json',
+    alphafold_pae_url: str = 'https://alphafold.ebi.ac.uk/files/AF-{protein}-F1-predicted_aligned_error_v{version}.json',
     timeout: int = 60,
     verbose_log: bool = False,
 ) -> tuple:
@@ -153,7 +153,7 @@ def download_alphafold_pae(
         else:
             try:
                 for AFversion in AFversions:
-                    response = requests.get(alphafold_cif_url.format(protein=protein,version=AFversion))
+                    response = requests.get(alphafold_pae_url.format(protein=protein,version=AFversion))
                     if response.status_code == 200:
                         latest_AFversion = AFversion
                         break
