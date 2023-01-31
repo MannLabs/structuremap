@@ -83,6 +83,8 @@ def download_alphafold_cif(
                 if response.status_code == 200:
                     latest_AFversion = AFversion
                     break
+                else:
+                    latest_AFversion = 404
             name_in = alphafold_cif_url.format(protein=protein,version=latest_AFversion)
             try:
                 urllib.request.urlretrieve(name_in, name_out)
@@ -157,6 +159,8 @@ def download_alphafold_pae(
                     if response.status_code == 200:
                         latest_AFversion = AFversion
                         break
+                    else:
+                        latest_AFversion = 404
                 name_in = alphafold_pae_url.format(protein=protein,version=latest_AFversion)
                 with tempfile.TemporaryDirectory() as tmp_pae_dir:
                     tmp_pae_file_name = os.path.join(
