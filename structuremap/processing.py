@@ -11,6 +11,7 @@ import random
 import logging
 import ssl
 import tempfile
+import requests
 
 # external
 import numba
@@ -31,7 +32,7 @@ def download_alphafold_cif(
     proteins: list,
     out_folder: str,
     out_format: str = "{}.cif",
-    alphafold_cif_url: str = 'https://alphafold.ebi.ac.uk/files/AF-{}-F1-model_v1.cif',
+    alphafold_cif_url: str = 'https://alphafold.ebi.ac.uk/files/AF-{protein}-F1-model_v{version}.cif',
     timeout: int = 60,
     verbose_log: bool = False,
 ) -> tuple:
@@ -65,10 +66,11 @@ def download_alphafold_cif(
     valid_proteins = []
     invalid_proteins = []
     existing_proteins = []
+    AFversions = [9, 8, 7, 6, 5, 4, 3, 2, 1] #Dirty fix, but should hold up for the foreseeable future
+
     if not os.path.exists(out_folder):
         os.makedirs(out_folder)
     for protein in tqdm.tqdm(proteins):
-        name_in = alphafold_cif_url.format(protein)
         name_out = os.path.join(
             out_folder,
             out_format.format(protein)
@@ -76,6 +78,14 @@ def download_alphafold_cif(
         if os.path.isfile(name_out):
             existing_proteins.append(protein)
         else:
+            for AFversion in AFversions:
+                response = requests.get(alphafold_cif_url.format(protein=protein,version=AFversion))
+                if response.status_code == 200:
+                    latest_AFversion = AFversion
+                    break
+                else:
+                    latest_AFversion = 404
+            name_in = alphafold_cif_url.format(protein=protein,version=latest_AFversion)
             try:
                 urllib.request.urlretrieve(name_in, name_out)
                 valid_proteins.append(protein)
@@ -93,7 +103,7 @@ def download_alphafold_pae(
     proteins: list,
     out_folder: str,
     out_format: str = "pae_{}.hdf",
-    alphafold_pae_url: str = 'https://alphafold.ebi.ac.uk/files/AF-{}-F1-predicted_aligned_error_v1.json',
+    alphafold_pae_url: str = 'https://alphafold.ebi.ac.uk/files/AF-{protein}-F1-predicted_aligned_error_v{version}.json',
     timeout: int = 60,
     verbose_log: bool = False,
 ) -> tuple:
@@ -132,6 +142,7 @@ def download_alphafold_pae(
     valid_proteins = []
     invalid_proteins = []
     existing_proteins = []
+    AFversions = [9, 8, 7, 6, 5, 4, 3, 2, 1] #Dirty fix, but should hold up for the foreseeable future
     if not os.path.exists(out_folder):
         os.makedirs(out_folder)
     for protein in tqdm.tqdm(proteins):
@@ -143,7 +154,14 @@ def download_alphafold_pae(
             existing_proteins.append(protein)
         else:
             try:
-                name_in = alphafold_pae_url.format(protein)
+                for AFversion in AFversions:
+                    response = requests.get(alphafold_pae_url.format(protein=protein,version=AFversion))
+                    if response.status_code == 200:
+                        latest_AFversion = AFversion
+                        break
+                    else:
+                        latest_AFversion = 404
+                name_in = alphafold_pae_url.format(protein=protein,version=latest_AFversion)
                 with tempfile.TemporaryDirectory() as tmp_pae_dir:
                     tmp_pae_file_name = os.path.join(
                         tmp_pae_dir,
@@ -152,7 +170,10 @@ def download_alphafold_pae(
                     urllib.request.urlretrieve(name_in, tmp_pae_file_name)
                     with open(tmp_pae_file_name) as tmp_pae_file:
                         data = json.loads(tmp_pae_file.read())
-                dist = np.array(data[0]['distance'])
+                if latest_AFversion < 3: 
+                    dist = np.array(data[0]['distance'])
+                else:
+                    dist = [item for sublist in data[0]["predicted_aligned_error"] for item in sublist]
                 data_list = [('dist', dist)]
                 if getattr(sys, 'frozen', False):
                     print('Using frozen h5py w/ gzip compression')
