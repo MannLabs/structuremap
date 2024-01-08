@@ -23,7 +23,7 @@ An open-source Python package for integrating information from predicted protein
 ---
 ## About
 
-An open-source Python package for integrating information from predicted protein structures deposited in the [AlphaFold database](https://alphafold.ebi.ac.uk/) with proteomics data and specifically with post-translational modifications (PTMs). You can find a detailed description of the tool and its capabilities to generate biological insights in ["The structural context of PTMs at a proteome wide scale" by Bludau et al. (2022)](https://doi.org/10.1101/2022.02.23.481596). The complete anlaysis workflow of this study performed with structuremap can be found [here](https://github.com/MannLabs/structuremap_analysis).
+An open-source Python package for integrating information from predicted protein structures deposited in the [AlphaFold database](https://alphafold.ebi.ac.uk/) with proteomics data and specifically with post-translational modifications (PTMs). You can find a detailed description of the tool and its capabilities to generate biological insights in ["The structural context of PTMs at a proteome wide scale" by Bludau et al. (2022)](https://doi.org/10.1371/journal.pbio.3001636). The complete anlaysis workflow of this study performed with structuremap can be found [here](https://github.com/MannLabs/structuremap_analysis).
 
 ---
 ## License
