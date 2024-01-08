@@ -23,7 +23,7 @@ An open-source Python package for integrating information from predicted protein
 ---
 ## About
 
-An open-source Python package for integrating information from predicted protein structures deposited in the [AlphaFold database](https://alphafold.ebi.ac.uk/) with proteomics data and specifically with post-translational modifications (PTMs). PTMs on 3D protein structures can be visualised by [AlphaMap](https://github.com/MannLabs/alphamap).
+An open-source Python package for integrating information from predicted protein structures deposited in the [AlphaFold database](https://alphafold.ebi.ac.uk/) with proteomics data and specifically with post-translational modifications (PTMs). You can find a detailed description of the tool and its capabilities to generate biological insights in ["The structural context of PTMs at a proteome wide scale" by Bludau et al. (2022)](https://doi.org/10.1101/2022.02.23.481596). The complete anlaysis workflow of this study performed with structuremap can be found [here](https://github.com/MannLabs/structuremap_analysis).
 
 ---
 ## License
@@ -115,7 +115,9 @@ In case of issues, check out the following:
 ---
 ## Citing structuremap
 
-If you use structuremap for your work, please cite our paper on biorxiv: https://www.biorxiv.org/content/10.1101/2022.02.23.481596v1
+If you use structuremap for your work, please cite our publication:
+
+Bludau I, et al. (2022) The structural context of posttranslational modifications at a proteome-wide scale. PLOS Biology 20(5): e3001636. https://doi.org/10.1371/journal.pbio.3001636
 
 ---
 ## How to contribute
