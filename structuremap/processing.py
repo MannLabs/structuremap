@@ -46,6 +46,10 @@ def download_alphafold_cif(
         download the structures.
     out_folder : str
         Path to the output folder.
+    out_format : str
+        The default file name of the cif files to be saved.
+        The brackets {} are replaced by a protein name from the proteins list.
+        Default is '{}.cif'.
     alphafold_cif_url : str
         The base link from where to download cif files.
         The brackets {} are replaced by a protein name from the proteins list.
@@ -119,7 +123,7 @@ def download_alphafold_pae(
     out_folder : str
         Path to the output folder.
     out_format : str
-        The default file name of the cif files to be saved.
+        The default file name of the pae files to be saved.
         The brackets {} are replaced by a protein name from the proteins list.
         Default is 'pae_{}.hdf'.
     alphafold_pae_url : str
