@@ -47,7 +47,7 @@ structuremap can be installed in an existing Python 3.8 environment with a singl
 pip install structuremap
 ```
 
-Installing structuremap like this avoids conflicts when integrating it in other tools, as this does not enforce strict versioning of dependancies. However, if new versions of dependancies are released, they are not guaranteed to be fully compatible with structuremap. While this should only occur in rare cases where dependencies are not backwards compatible, you can always force structuremap to use dependancy versions which are known to be compatible with:
+Installing structuremap like this avoids conflicts when integrating it in other tools, as this does not enforce strict versioning of dependencies. However, if new versions of dependencies are released, they are not guaranteed to be fully compatible with structuremap. While this should only occur in rare cases where dependencies are not backwards compatible, you can always force structuremap to use dependency versions which are known to be compatible with:
 
 ```bash
 pip install "structuremap[stable]"
@@ -78,20 +78,20 @@ Next, download the structuremap repository from GitHub either directly or with a
 git clone https://github.com/MannLabs/structuremap.git
 ```
 
-For any Python package, it is highly recommended to use a separate [conda virtual environment](https://docs.conda.io/en/latest/), as otherwise *dependancy conflicts can occur with already existing packages*.
+For any Python package, it is highly recommended to use a separate [conda virtual environment](https://docs.conda.io/en/latest/), as otherwise *dependency conflicts can occur with already existing packages*.
 
 ```bash
 conda create --name structuremap python=3.8 -y
 conda activate structuremap
 ```
 
-Finally, structuremap and all its [dependancies](requirements) need to be installed. To take advantage of all features and allow development (with the `-e` flag), this is best done by also installing the [development dependencies](requirements/requirements_development.txt) instead of only the [core dependencies](requirements/requirements.txt):
+Finally, structuremap and all its [dependencies](requirements) need to be installed. To take advantage of all features and allow development (with the `-e` flag), this is best done by also installing the [development dependencies](requirements/requirements_development.txt) instead of only the [core dependencies](requirements/requirements.txt):
 
 ```bash
 pip install -e "./structuremap[development]"
 ```
 
-By default this installs loose dependancies (no explicit versioning), although it is also possible to use stable dependencies (e.g. `pip install -e "./structuremap[stable,development-stable]"`).
+By default this installs loose dependencies (no explicit versioning), although it is also possible to use stable dependencies (e.g. `pip install -e "./structuremap[stable,development-stable]"`).
 
 ***By using the editable flag `-e`, all modifications to the [structuremap source code folder](structuremap) are directly reflected when running structuremap. Note that the structuremap folder cannot be moved and/or renamed if an editable version is installed. In case of confusion, you can always retrieve the location of any Python module with e.g. the command `import module` followed by `module.__file__`.***
 

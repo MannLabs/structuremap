@@ -1123,7 +1123,7 @@ def perform_enrichment_analysis(df: pd.DataFrame,
         List of regions of interest (one hot encoded columns in df) for which
         to perform the enrichment analysis.
     quality_cutoffs : list
-        List of quality cutoffs (AlphaFold pLDDDT values) to filter for.
+        List of quality cutoffs (AlphaFold pLDDT values) to filter for.
     ptm_site_dict : dict
         Dictionary containing the possible amino acid sites for each PTM.
     multiple_testing : bool
@@ -1198,7 +1198,7 @@ def perform_enrichment_analysis_per_protein(
         List of regions of interest (one hot encoded columns in df) for which
         to perform the enrichment analysis.
     quality_cutoffs : list
-        List of quality cutoffs (AlphaFold pLDDDT values) to filter for.
+        List of quality cutoffs (AlphaFold pLDDT values) to filter for.
     ptm_site_dict : dict
         Dictionary containing the possible amino acid sites for each PTM.
 
