@@ -20,7 +20,7 @@ python setup.py sdist bdist_wheel
 
 # Setting up the local package
 cd release/one_click_macos_gui
-pip install "../../dist/structuremap-0.0.9-py3-none-any.whl[stable]"
+pip install "../../dist/structuremap-0.0.10-py3-none-any.whl[stable]"
 
 # Creating the stand-alone pyinstaller folder
 pip install pyinstaller==4.2
@@ -40,5 +40,5 @@ cp ../../LICENSE.txt Resources/LICENSE.txt
 cp ../logos/alpha_logo.png Resources/alpha_logo.png
 chmod 777 scripts/*
 
-pkgbuild --root dist/structuremap --identifier de.mpg.biochem.structuremap.app --version 0.0.9 --install-location /Applications/structuremap.app --scripts scripts structuremap.pkg
+pkgbuild --root dist/structuremap --identifier de.mpg.biochem.structuremap.app --version 0.0.10 --install-location /Applications/structuremap.app --scripts scripts structuremap.pkg
 productbuild --distribution distribution.xml --resources Resources --package-path structuremap.pkg dist/structuremap_gui_installer_macos.pkg
